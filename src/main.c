@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.12 2002/06/27 15:56:39 juam Exp $
+ * $Id: main.c,v 1.13 2002/06/27 16:47:36 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -44,6 +44,12 @@
 
 const char *rs_program_name; 	/* for the logs */
 const char *progname;
+
+/* uggh. i need to mantain a global var with the server socket so we proper
+ * clean it when some one kill us
+ */
+static int serverSocket = -1;
+
 static void
 help ( void )
 {	printf (
@@ -265,6 +271,18 @@ fork_to_background ( void )
 	return;
 }
 
+static void 
+hndl_sigterm( int signal )
+{	
+	/* Note: we don't our childs so transactions are finished
+	 */
+
+	rs_log_info("signal %d, cleaning up and exiting",signal);
+	
+	/* proper close of the server socket */
+	close(serverSocket);	
+}
+
 static int
 standalone_server( const struct opt *opt)
 { 	unsigned int size;
@@ -273,6 +291,10 @@ standalone_server( const struct opt *opt)
 
 	if( (server = createServer( opt->lport )) < 0 )
 		return EXIT_FAILURE;
+		
+	serverSocket = server;	
+	signal(SIGTERM, hndl_sigterm);
+	signal(SIGINT,  hndl_sigterm);
 
 	if( opt->fork )
 		fork_to_background();
@@ -307,6 +329,7 @@ is_a_socket(int fd)
 	l = sizeof(int);
 	return (getsockopt(fd, SOL_SOCKET, SO_TYPE, (char *) &v, &l) == 0);
 }
+
 
 int
 main( int argc, char **argv )
