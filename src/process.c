@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.7 2002/06/27 15:56:39 juam Exp $
+ * $Id: process.c,v 1.8 2003/01/17 17:43:00 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #include "trace.h"
-#include "string.h"
+#include "mstring.h"
 #include "pop.h"
 #include "access.h"
 

@@ -1,7 +1,8 @@
 /*
- * $Id: strdup.c,v 0.0 2001/08/21 14:36:23 juam Exp $
+ * $Id: strdup.c,v 0.1 2003/01/17 17:42:58 juam Exp $
  */
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include "debug.h"
 #include "strdup.h"

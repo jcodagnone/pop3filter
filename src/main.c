@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.15 2002/07/23 17:50:44 juam Exp $
+ * $Id: main.c,v 1.16 2003/01/17 17:42:59 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -61,7 +61,8 @@ help ( void )
 	"        rport               remote port to connect\n"
 	"        lport               local port to listen connections\n"
 	"        filter              command that filters a message\n"
-	"\n"
+	"\n",progname);
+	printf (
 	"OPTIONS\n"
 	/* X   X                      X */
 	" -V   --version              print the version info and dies\n"
@@ -70,7 +71,7 @@ help ( void )
 	" -e file                     write filter stderr to file\n"
 	"\n"
 	"Send bugs to <juam at users dot sourceforge dot net>\n"
-	"\n",progname);
+	"\n");
 
 	exit( EXIT_SUCCESS );
 }

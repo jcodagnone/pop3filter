@@ -1,0 +1,84 @@
+AC_INIT
+AC_CONFIG_AUX_DIR(admin)
+
+POP3FILTER_MAJOR_VERSION=0
+POP3FILTER_MINOR_VERSION=0
+POP3FILTER_MICRO_VERSION=1
+POP3FILTER_VERSION=$POP3FILTER_MAJOR_VERSION.$POP3FILTER_MINOR_VERSION.$POP3FILTER_MICRO_VERSION
+
+POP3FILTER_DATE="Jan 17 2003"
+VERSION=$POP3FILTER_VERSION
+PACKAGE=pop3filter
+
+AC_CANONICAL_SYSTEM
+AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
+AM_CONFIG_HEADER(config.h)
+AC_PREFIX_DEFAULT(/usr/local)
+
+CFLAGS="-ansi -pedantic -Wall -pedantic-errors"
+AC_ARG_ENABLE(debug,
+  [  --enable-debug        creates debugging code],
+  [  pop3filter_use_debug="$enableval"],[pop3filter_use_debug="no"])
+
+  CFLAGS=`echo $CFLAGS | sed s/-g//`
+  if test "$pop3filter_use_debug" = "yes"; then
+        CFLAGS="$CFLAGS -g"
+  fi
+
+
+# Build time sanity check...
+AM_SANITY_CHECK
+
+# Checks for programs.
+AC_PROG_CC
+AC_MINGW32
+
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+AC_ISC_POSIX
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([stdlib.h string.h])
+
+dnl Only use -Wall if we have gcc
+if test "x$GCC" = "xyes"; then
+  if test -z "`echo "$CFLAGS" | grep "\-Wall" 2> /dev/null`" ; then
+    CFLAGS="$CFLAGS -Wall -W -ansi -Wnested-externs -Winline -Wno-unused -I ../../libmisc"
+  fi
+fi
+
+dnl --------------------------------------------------------------------------
+dnl Optionnal stuff
+dnl --------------------------------------------------------------------------
+
+LIBS="$LIBS -L../../libmisc -lmisc"
+
+dnl --------------------------------------------------------------------------
+dnl Substitutions
+dnl --------------------------------------------------------------------------
+AC_SUBST(PACKAGE)
+AC_SUBST(POP3FILTER_VERSION)
+AC_SUBST(POP3FILTER_DATE)
+
+
+AC_OUTPUT([
+Makefile
+pop3filter.1
+lib/Makefile
+src/Makefile
+bin/Makefile])
+
+
+echo
+echo "pop3filter configure report:"
+echo
+echo "     CFLAGS                        : $ac_save_CFLAGS"
+echo "     LIBS                          : $LIBS"
+echo "     Locales in use                : $ALL_LINGUAS"
+echo "==============================================================="
+echo
+echo "Type \"make\" to compile crafted."
+echo
+
