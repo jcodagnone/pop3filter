@@ -2,5 +2,4 @@ tmp
 .cvsignore
 pop3filter
 ChangeLog
-Makefile.in
-.deps
+Makefile.am
