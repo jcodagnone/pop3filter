@@ -1,6 +1,6 @@
 /*
  * pop -- 
- * $Id: pop.c,v 1.8 2003/06/04 13:34:47 juam Exp $
+ * $Id: pop.c,v 1.9 2003/08/03 15:36:07 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -138,7 +138,7 @@ user_getname(struct global *d, const char *buf)
 {	char *q;
 	unsigned i;
 
-	for( ; isspace(buf) ; buf++)
+	for( ; isspace(*buf) ; buf++)
 		;
 	q = strchr(buf,' ');
 	if( q )
