@@ -1,0 +1,359 @@
+2003-08-03 12:36  juam
+
+	* src/pop.c: user_getname(): bugfix for a silly sigsegv
+
+2003-07-10 16:13  juam
+
+	* src/main.c: issue a warning if more parameters come after the
+	filter
+
+2003-06-04 13:40  juam
+
+	* src/process.c: cleaning things
+
+2003-06-04 13:33  juam
+
+	* src/: queue.c, queue.h: 
+	 o some coding style issues.
+	 o rename queue_dequeue to queue_block_dequeue
+	 o fix buf in queue_block_dequeue() when dequeing only 1 element
+	from the
+	   queue
+
+2003-06-04 10:40  juam
+
+	* src/process.c: cosmetic changes:    %s/rstring/remote_str   
+	%s/lstring/local_str
+
+2003-06-04 10:34  juam
+
+	* src/: main.c, pop.c, process.c, process.h: cosmetic changes:
+	(missing spaces)
+
+2003-02-13 11:33  juam
+
+	* doc/: .cvsignore, Makefile.am, schem.png: initial import
+
+2003-02-13 11:30  juam
+
+	* .cvsignore, bin/.cvsignore, .cvsignore: [no log message]
+
+2003-02-13 11:16  juam
+
+	* pop3filter.1.in: missing example for transparent proxy.  thanks 
+	Denis Vlasenko < vda @at@ port	imtp ilyichevsk odessa ua> for the
+	notice
+
+2003-01-21 13:53  juam
+
+	* configure.in, src/main.c: fix a compilation problem
+
+2003-01-19 17:14  juam
+
+	* INSTALL: first ci
+
+2003-01-19 17:01  juam
+
+	* ChangeLog, admin/acinclude.m4: initial commit
+
+2003-01-19 16:56  juam
+
+	* AUTHORS, Makefile.am, configure.in, pop3filter.1.in,
+	src/Makefile.am, src/main.c, src/main.h, src/pop.c, src/pop.h,
+	src/process.c, src/queue.c: big big resync. kids don't do this at
+	home :)
+
+2003-01-18 01:30  juam
+
+	* pop3filter.1.in: fix a typo and add the correct date
+
+2003-01-18 01:29  juam
+
+	* .cvsignore, lib/.cvsignore, src/.cvsignore: ignore more things
+
+2003-01-18 01:28  juam
+
+	* src/: queue.c, queue.h: import files
+
+2003-01-18 01:27  juam
+
+	* lib/Makefile: bye bye
+
+2003-01-18 01:25  juam
+
+	* src/main.c: some comments
+
+2003-01-18 01:24  juam
+
+	* pop3filter.1: [no log message]
+
+2003-01-18 01:22  juam
+
+	* config.h, configure.in, src/Makefile.am: autoconf / automake
+	fixes
+
+2003-01-17 14:49  juam
+
+	* .cvsignore, AUTHOR, admin/Makefile.common, admin/config.guess,
+	admin/config.sub, admin/depcomp, admin/install-sh, admin/missing,
+	admin/mkinstalldirs, src/.cvsignore, src/Makefile.am,
+	src/mstring.h, src/string.h, lib/.cvsignore, src/.cvsignore:
+	autoconf automake system
+
+2003-01-17 14:42  juam
+
+	* AUTHORS, Makefile, Makefile.am, Makefile.cvs, NEWS, config.h,
+	configure.in, cvs2cl.ufile, pop3filter.1, pop3filter.1.in,
+	bin/Makefile.am, lib/Makefile, lib/Makefile.am, lib/strdup.c,
+	src/Makefile, src/main.c, src/process.c, src/string.c: resync
+
+2002-07-23 14:50  juam
+
+	* src/main.c: close() on error
+
+2002-07-18 18:59  juam
+
+	* Makefile, pop3filter.1, src/main.c: old changes i had on my tree.
+
+2002-06-27 13:47  juam
+
+	* src/main.c: added proper process termination
+
+2002-06-27 12:59  juam
+
+	* lib/.cvsignore: added .cvsignore and Changelog
+
+2002-06-27 12:58  juam
+
+	* .cvsignore, src/.cvsignore: added ChangeLog
+
+2002-06-27 12:56  juam
+
+	* src/: Makefile, main.c, main.h, pop.c, process.c: added -e
+	support
+
+2002-06-27 12:52  juam
+
+	* lib/newopt.c: stupid.
+
+2002-06-26 18:50  juam
+
+	* lib/newopt.c: fixed problem saving OPT_T_GENER
+
+2002-06-23 23:54  juam
+
+	* .cvsignore, Changelog: [no log message]
+
+2002-06-23 23:53  juam
+
+	* TODO: remove inetd todo
+
+2002-06-23 23:52  juam
+
+	* pop3filter.1: pop3filter's manual page
+
+2002-06-23 23:35  juam
+
+	* Makefile, lib/Makefile, src/Makefile: convert Changelog from cvs
+	to rcs
+
+2002-06-23 23:34  juam
+
+	* src/.cvsignore: [no log message]
+
+2002-06-23 23:28  juam
+
+	* bin/cvs2cl.pl, cvs2cl.ufile: [no log message]
+
+2002-06-23 20:51  juam
+
+	* src/: main.c, pop.h, process.c, process.h: Added inetd support
+
+2002-06-23 18:12  juam
+
+	* src/: access.c, access.h: Host access control
+
+2002-06-23 18:10  juam
+
+	* src/: Makefile, process.c: Initial host access support
+
+2002-06-22 19:42  juam
+
+	* src/: Makefile, pop.c: Depend update
+
+2002-06-22 19:37  juam
+
+	* BUGS, Makefile: [no log message]
+
+2002-06-22 19:37  juam
+
+	* COPYING, Changelog, README, TODO, config.h, pop3filter.1: Initial
+	revision
+
+2002-06-22 19:18  juam
+
+	* src/main.c: changed order of argv parameters: lport goes to the
+	end
+
+2002-06-19 23:39  juam
+
+	* src/main.c: missing include files
+
+2002-06-19 23:38  juam
+
+	* src/main.c: added missing bits to smart_fork :)
+
+2002-06-19 14:52  juam
+
+	* src/: main.c, pop.c, pop.h, process.c, process.h: Added support
+	for defined enviroment varibles in filter process
+
+2002-06-19 14:46  juam
+
+	* src/main.h: [no log message]
+
+2002-06-19 14:44  juam
+
+	* src/Makefile: added config.h support
+
+2002-06-19 14:40  juam
+
+	* src/main.h: [no log message]
+
+2002-06-19 14:39  juam
+
+	* src/Makefile: added itoa depend
+
+2002-06-19 14:38  juam
+
+	* src/Makefile: removed trace. (opps)
+
+2002-06-19 14:37  juam
+
+	* lib/itoa.h: Initial revision
+
+2002-06-19 14:36  juam
+
+	* lib/itoa.c: added support for systems that don't have snprintf
+	done
+
+2002-06-19 14:35  juam
+
+	* lib/Makefile: config support
+
+2002-06-19 14:31  juam
+
+	* lib/Makefile: added support for config.h
+
+2002-06-19 14:20  juam
+
+	* lib/Makefile: added atoi.c
+
+2002-06-19 14:18  juam
+
+	* lib/itoa.c: Initial revision
+
+2002-06-19 12:59  juam
+
+	* src/Makefile: added main.h depends
+
+2002-06-19 12:48  juam
+
+	* src/: main.h, main.c, process.c, process.h: change do_server
+	interface (now is proxy_request)
+
+2002-06-19 00:03  juam
+
+	* src/Makefile: change name form popfilter to pop3filter because
+	there is a perl thing in sf with that name. Grrr
+
+2002-06-18 14:14  juam
+
+	* src/Makefile: clean core file
+
+2002-06-18 14:07  juam
+
+	* lib/newopt.c: Added GPL header
+
+2002-06-18 14:03  juam
+
+	* src/main.c: FEATURE: added fork to background feature
+
+2002-06-18 13:43  juam
+
+	* src/: main.c, pop.c: Use trace.c to log errors
+
+2002-06-18 13:04  juam
+
+	* Makefile, BUGS, AUTHOR: Initial revision
+
+2002-06-18 12:58  juam
+
+	* src/: pop.c, process.c, string.c: Added GPL header
+
+2002-06-18 12:50  juam
+
+	* src/Makefile: move trace.c to lib
+
+2002-06-18 12:49  juam
+
+	* lib/Makefile: Initial revision
+
+2002-06-18 12:41  juam
+
+	* src/main.c: BUGFIX: smart_fork was not so smart...
+
+2002-06-18 12:26  juam
+
+	* src/Makefile: newopt goes to lib
+
+2002-06-18 01:08  juam
+
+	* src/main.c: added option's parser
+
+2002-06-17 15:34  juam
+
+	* src/Makefile: Initial revision
+
+2002-06-17 15:32  juam
+
+	* lib/trace.c, lib/trace.h, src/main.c, src/pop.c, src/pop.h,
+	src/process.c, src/process.h, src/string.c, src/string.h: Initial
+	commit
+
+2001-10-31 22:56  juam
+
+	* lib/debug.c: added nice colors to the levels :-)
+
+2001-10-02 23:12  juam
+
+	* lib/newopt.c: fix. initialization posible bug
+
+2001-10-01 00:48  juam
+
+	* lib/newopt.h: OPT_T_FLOAT -> OPT_T_REAL -
+
+2001-10-01 00:47  juam
+
+	* lib/newopt.c: better classes
+
+2001-09-30 12:52  juam
+
+	* lib/newopt.h: Initial revision
+
+2001-09-30 12:52  juam
+
+	* lib/newopt.c: initial version
+
+2001-08-21 11:36  juam
+
+	* lib/: strdup.c, strdup.h: initial version
+
+2001-06-17 20:33  juam
+
+	* lib/debug.h: Version inicial
+
+2001-06-13 11:54  juam
+
+	* lib/debug.c: Version Inicial
+
