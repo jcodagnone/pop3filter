@@ -1,6 +1,5 @@
 /*
  * process -- 
- * $Id: process.c,v 1.14 2004/05/01 15:24:25 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *

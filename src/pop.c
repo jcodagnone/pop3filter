@@ -1,6 +1,5 @@
 /*
  * pop -- 
- * $Id: pop.c,v 1.10 2004/05/01 14:37:01 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *

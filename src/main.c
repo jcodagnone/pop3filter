@@ -1,6 +1,5 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.28 2004/05/01 14:32:11 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *

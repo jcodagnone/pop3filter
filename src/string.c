@@ -1,6 +1,5 @@
 /*
  * string.c  -- String functions 
- * $Id: string.c,v 1.4 2004/05/01 15:24:25 juam Exp $
  *
  * Copyright (C) 2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
