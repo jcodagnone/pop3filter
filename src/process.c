@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.4 2002/06/19 17:52:53 juam Exp $
+ * $Id: process.c,v 1.5 2002/06/23 21:10:40 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -38,7 +38,7 @@
 #include "trace.h"
 #include "string.h"
 #include "pop.h"
-
+#include "access.h"
 
 
 #define MAX_BUFF		4096
@@ -114,7 +114,10 @@ proxy_request ( int local, int remote, struct opt *opt )
 	string_t lstring,rstring;
 	int nRet=0;
 	fd_set rfds,rback,  wfds,wback, efds,eback;
-	
+
+	if( !client_access( local, opt))
+		return -1;
+
 	proxy_init(local,remote,opt,&data,&rfds,&wfds,&efds);
 	lstring = NewString();
 	rstring = NewString();

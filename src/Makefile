@@ -1,7 +1,7 @@
-# $Id: Makefile,v 1.10 2002/06/22 22:42:13 juam Exp $ 
+# $Id: Makefile,v 1.11 2002/06/23 21:10:40 juam Exp $ 
 
 CFLAGS = -Wall  -g -pedantic -pedantic-errors -I../lib -I..
-OBJS = main.o pop.o process.o string.o
+OBJS = main.o pop.o process.o string.o access.o
 OUT = pop3filter
 
 
@@ -16,6 +16,7 @@ Changelog:	RCS/*
 
 # deps
 main.o:		process.h ../lib/trace.h ../lib/newopt.h main.h
+access.o:	access.h ../lib/trace.h main.h
 process.o:	pop.h string.h main.h
 pop.o:		pop.h main.h ../lib/itoa.h
 string.o:	string.h
