@@ -1,6 +1,6 @@
 /*
  * pop -- 
- * $Id: pop.c,v 1.4 2002/06/19 17:52:53 juam Exp $
+ * $Id: pop.c,v 1.5 2002/06/22 22:42:13 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -313,7 +313,7 @@ pop_child_read(struct global *d, char *buf,size_t size)
 {	int ret = 0;
 	int len;
 
-	while( (len = read(d->fd[PIPE_CHILD_READ],buf, size)) >0 )
+	len = read(d->fd[PIPE_CHILD_READ],buf, size);
 	{   
 		if(!d->failed )
 			if ( send(d->local,buf,len,0) < 0 )

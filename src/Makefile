@@ -1,11 +1,11 @@
-# $Id: Makefile,v 1.9 2002/06/19 17:44:21 juam Exp $ 
+# $Id: Makefile,v 1.10 2002/06/22 22:42:13 juam Exp $ 
 
 CFLAGS = -Wall  -g -pedantic -pedantic-errors -I../lib -I..
 OBJS = main.o pop.o process.o string.o
 OUT = pop3filter
 
 
-all: $(OBJS)
+all: $(OBJS) ../lib/libmisc.a
 	$(CC) $(OBJS) ../lib/libmisc.a  -o  $(OUT)
 
 clean:
