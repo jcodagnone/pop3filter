@@ -11,7 +11,7 @@
  * 	TODO return
  */
 int
-proxy_request ( int lsock, int rsock, struct opt *opt );
+proxy_request ( int lsock, int rsock, const struct opt *opt );
 
 
 #endif

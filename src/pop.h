@@ -27,7 +27,7 @@ enum {
  *	Global data to share across async calls
  */
 struct global
-{	struct opt *opt ;	/* options */
+{	const struct opt *opt ;	/* options */
 	int local,remote;	/* sockets */
 	int fd[4];		/* comunication pipes */
 	enum cmds last_cmd;	/* the last pop3 command */

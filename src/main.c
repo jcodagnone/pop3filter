@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.10 2002/06/22 22:18:31 juam Exp $
+ * $Id: main.c,v 1.11 2002/06/23 23:51:15 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -38,7 +38,9 @@
 #include "trace.h"
 #include "newopt.h"
 
-
+#ifdef HAVE_SYSLOGD
+ #include <syslogd>
+#endif
 
 const char *rs_program_name; 	/* for the logs */
 const char *progname;
@@ -128,6 +130,21 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 	return 0;
 }
 /***************************************************************************/
+static void
+open_syslogd(void)
+{
+	#ifdef HAVE_SYSLOGD
+		openlog(progname, LOG_PID, LOG_DAEMON);
+	#endif
+}
+
+static void
+close_syslogd(void)
+{
+	#ifdef HAVE_SYSLOGD
+		closelog();
+	#endif
+}
 
 /* Creates a socket to `szServer:port'
  */
@@ -193,7 +210,7 @@ createServer(short port)
 }
 
 static int
-child( int local, struct opt *opt )
+child( int local, const struct opt *opt )
 {	int remote;
 
 	remote = connectHost(opt->server,opt->rport);
@@ -210,7 +227,7 @@ child( int local, struct opt *opt )
  * (and we can work with a blocking accept(2) )
  */
 static void
-smart_fork( int local, struct opt *opt )
+smart_fork( int local, const struct opt *opt )
 {	pid_t pid;
 
 	pid = fork();
@@ -229,49 +246,88 @@ static void
 fork_to_background ( void )
 {	pid_t pid;
 
+	rs_trace_to(rs_trace_syslog);
 	pid = fork();
 	if( pid > 0 )
 		exit( EXIT_SUCCESS );
 	else if ( pid == -1 )
 		rs_log_error("going to the background: %s",strerror(errno));
 
-	rs_log_info("running in the background");
 	/* anythig else? */
 	freopen ("/dev/null", "r", stdin);
 	freopen ("/dev/null", "w", stdout);
-	/* freopen ("/dev/null", "w", stderr); */ /* we are login to stderr */
+	freopen ("/dev/null", "w", stderr);
+	
 	
 	setsid();
-	
+
+	rs_log_info("running in the background");
+
 	return;
 }
 
-int
-main( int argc, char **argv )
-{	int server,local;
+static int
+standalone_server( const struct opt *opt)
+{ 	unsigned int size;
 	struct sockaddr_in cliAddr;
-	struct opt opt;
-	unsigned int size;
+	int server,local;
 
-	progname = rs_program_name = *argv;
-	rs_trace_to(rs_trace_stderr); 
-
-	if( parseOptions( argc, argv, &opt ) < 0 )
+	if( (server = createServer( opt->lport )) < 0 )
 		return EXIT_FAILURE;
 
-	if( (server = createServer( opt.lport )) < 0 )
-		return EXIT_FAILURE;
-
-	if( opt.fork )
+	if( opt->fork )
 		fork_to_background();
-
-
+		
 	size = sizeof(cliAddr);
 	while( (local=accept(server,(struct sockaddr *) &cliAddr,&size)) >=0 )
-		smart_fork(local,&opt);	
+		smart_fork(local,opt);	
 	
 	close(server);
 
 	return EXIT_SUCCESS;
+}
+
+
+static int
+inetd_server( const struct opt* opt)
+{
+	rs_trace_to(rs_trace_syslog);
+	rs_log_info("stdin is socket; assuming inetd mode");
+
+	if( opt->fork )
+		rs_log_info("inetd mode: ignoring fork flag");
+	
+	return child( STDIN_FILENO, opt );
+}
+
+static int
+is_a_socket(int fd)
+{ 	int v;
+	socklen_t l;
+	
+	l = sizeof(int);
+	return (getsockopt(fd, SOL_SOCKET, SO_TYPE, (char *) &v, &l) == 0);
+}
+
+int
+main( int argc, char **argv )
+{	struct opt opt;
+	int nRet;
+
+	open_syslogd();
+	progname = rs_program_name = *argv;
+	rs_trace_to(rs_trace_stderr); 
+	
+	if( parseOptions( argc, argv, &opt ) < 0 )
+		return EXIT_FAILURE;
+
+	if( is_a_socket(STDIN_FILENO))
+		nRet = inetd_server( &opt );
+	else
+		nRet = standalone_server( &opt );
+
+	close_syslogd();
+
+	return nRet;
 }
 

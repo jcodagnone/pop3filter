@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.5 2002/06/23 21:10:40 juam Exp $
+ * $Id: process.c,v 1.6 2002/06/23 23:51:15 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -79,7 +79,7 @@ int (*p)(struct global  *, const char *) )
 
 
 static  void
-proxy_init( int local, int remote, struct opt *opt,struct global *data,
+proxy_init( int local, int remote, const struct opt *opt,struct global *data,
                  fd_set *r,fd_set *w,fd_set *e)
 {
 	data->local = local;
