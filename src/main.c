@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.26 2004/04/29 05:03:42 juam Exp $
+ * $Id: main.c,v 1.27 2004/04/29 05:12:55 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -201,40 +201,46 @@ connectHost(const char *szServer, short port)
 static int
 pop3filter_socket_listen(const char *listen_addr, short port)
 {	struct sockaddr_in servAddr;
-	int sd;
+	int sd = -1;
 
 	/* create socket */
 	sd = socket(AF_INET, SOCK_STREAM, 0);
 	if( sd<0 )
 	{	rs_log_error("creating socket: %s",strerror(errno));
- 		return -1;
+ 		sd = -1;
 	}
- 
-	/* bind server port */
-	servAddr.sin_family = AF_INET;
-	servAddr.sin_port = htons(port);
-	if( listen_addr ) 
-	{	if (!inet_aton(listen_addr, &servAddr.sin_addr))
-		{	rs_log_error("invalid IPv4 address: %s", listen_addr);
+ 	else
+	{	servAddr.sin_family = AF_INET;
+		servAddr.sin_port = htons(port);
+		if( listen_addr ) 
+		{	if (!inet_aton(listen_addr, &servAddr.sin_addr))
+			{	rs_log_error("invalid IPv4 address: %s",
+				              listen_addr);
+				close(sd);
+				sd = -1;
+			}
+		}
+		else
+			servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+		if( sd == -1 )
+			;
+		else if(bind(sd, (struct sockaddr *) &servAddr, 
+		             sizeof(servAddr)) == -1 )
+	 	{	if( listen_addr )
+				rs_log_error("binding socket (%s): %s",
+				             listen_addr, strerror(errno));
+			else
+				rs_log_error("binding socket: %s",
+				             strerror(errno));
 			close(sd);
 			sd = -1;
+		} 
+		else if( listen(sd,5) == -1 )
+		{	rs_log_error("listening socket: %s",strerror(errno));
+			close(sd);
+			return -1;
 		}
-	
-	}
-	else
-		servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	
- 
-	if(bind(sd, (struct sockaddr *) &servAddr, sizeof(servAddr))<0)
-	{	rs_log_error("binding socket: %s",strerror(errno));
-		close(sd);
-	  	return -1;
-	}
-	
-	if( listen(sd,5) == -1 )
-	{	rs_log_error("listening socket: %s",strerror(errno));
-		close(sd);
-		return -1;
 	}
 	
 	return sd;
