@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.11 2003/06/04 13:40:08 juam Exp $
+ * $Id: process.c,v 1.12 2003/06/04 16:40:51 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -45,6 +45,9 @@
 
 /* read data from a socket an process it
  *
+ * the idea is to process lines and not characters. Thats why we use
+ * a string_t
+ *
  * return
  *	<0	error or end of file
  *	 0	no new line. buff concatenated
@@ -52,7 +55,7 @@
  *	 2	same as 1 but there are more newlines
  */
 static int
-readsock( int socket, char *buff, size_t size, 
+read_and_process( int socket, char *buff, size_t size, 
           string_t string, struct global *d,
           int (*process)(struct global  *, const char *) )
 {	
@@ -129,9 +132,8 @@ proxy_run( int local, int remote, struct opt *opt )
 	struct global data;
 	char buf[MAX_BUFF];
 	int nRet=0;
-	
-	char *s;
 	size_t len;
+	char *s;
 	
 	if( !client_access( local, opt))
 		return -1;
@@ -149,20 +151,20 @@ proxy_run( int local, int remote, struct opt *opt )
 		return -1;
 	}
 
-	rback=rfds;
-	wback=wfds;
+	rback = rfds;
+	wback = wfds;
 	while( nRet != -1 && select(FD_SETSIZE, &rback, &wback, NULL, NULL) > 0)
 	{	
 		/* read from the filter process */
 		if( data.fd[PIPE_CHILD_READ] != -1 && 
-		    FD_ISSET(data.fd[PIPE_CHILD_READ],&rback) )
+		    FD_ISSET(data.fd[PIPE_CHILD_READ], &rback) )
 			nRet = pop_child_read(&data, buf, sizeof(buf));
 			
 		/* write to the filter process */
 		if( data.fd[PIPE_PAREN_WRITE] != -1 &&
-		    FD_ISSET( data.fd[PIPE_PAREN_WRITE],&wback) )
+		    FD_ISSET( data.fd[PIPE_PAREN_WRITE], &wback) )
 		{	
-			s = queue_dequeue(data.queue_fifo,&len);
+			s = queue_block_dequeue(data.queue_fifo, &len,MAX_BUFF);
 			if( s )
 			{	write(data.fd[PIPE_PAREN_WRITE], s, len);
 				free(s);
@@ -170,24 +172,25 @@ proxy_run( int local, int remote, struct opt *opt )
 		}
 
 		/* read commands from local socket */
-		if( FD_ISSET(local,&rback) )
-			nRet = readsock(local, buf, sizeof(buf), local_str, &data,
-			             pop_local_read);
+		if( FD_ISSET(local, &rback) )
+			nRet = read_and_process(local, buf, sizeof(buf),
+			                      local_str, &data, pop_local_read);
 
 		/* read responces from pop3 server */
-		if( FD_ISSET(remote,&rback) )
-			nRet = readsock(remote, buf, sizeof(buf), remote_str,
-			                &data, pop_remote_read);
+		if( FD_ISSET(remote, &rback) )
+			nRet = read_and_process(remote, buf, sizeof(buf),
+			                    remote_str, &data, pop_remote_read);
 
 		/* write to sockets */
-		if( FD_ISSET(local,&wback) )
-		{	s = queue_dequeue(data.queue_local,&len);
+		if( FD_ISSET(local, &wback) )
+		{	s = queue_block_dequeue(data.queue_local,&len,MAX_BUFF);
 			send(local, s, len,0);
 			free(s);
 		}
 
-		if( FD_ISSET(remote,&wback) )
-		{	s = queue_dequeue(data.queue_remote,&len);
+		if( FD_ISSET(remote, &wback) )
+		{	s = queue_block_dequeue(data.queue_remote, &len,
+		                                MAX_BUFF);
 			send(remote, s, len, 0);
 			free(s);
 		}
@@ -196,26 +199,26 @@ proxy_run( int local, int remote, struct opt *opt )
 		rback=rfds;
 		wback=wback;
 		if( data.fd[PIPE_CHILD_READ] != -1 )
-			FD_SET(data.fd[PIPE_CHILD_READ],&rback);
+			FD_SET(data.fd[PIPE_CHILD_READ], &rback);
 
 		if( data.fd[PIPE_PAREN_WRITE] != -1 )
 		{	if( !queue_is_empty(data.queue_fifo ) )
-				FD_SET(data.fd[PIPE_PAREN_WRITE],&wback);
+				FD_SET(data.fd[PIPE_PAREN_WRITE], &wback);
 			else
-				FD_CLR(data.fd[PIPE_PAREN_WRITE],&wback);
+				FD_CLR(data.fd[PIPE_PAREN_WRITE], &wback);
 		}
 		else
-			 FD_CLR(7,&wback);
+			 FD_CLR(7, &wback);
 
 		if( !queue_is_empty(data.queue_local) )
-			FD_SET(data.local,&wback);
+			FD_SET(data.local, &wback);
 		else
-			FD_CLR(data.local,&wback);
+			FD_CLR(data.local, &wback);
 			
 		if( !queue_is_empty(data.queue_remote) )
-			FD_SET(data.remote,&wback);
+			FD_SET(data.remote, &wback);
 		else
-			FD_CLR(data.remote,&wback);
+			FD_CLR(data.remote, &wback);
 
 		if( data.last_cmd == CMD_RETR &&
 		    data.retr     == RT_END   &&
@@ -230,17 +233,20 @@ proxy_run( int local, int remote, struct opt *opt )
 
 	/* if something has failed, then try to clean buffers */
 	nRet = 1;
-	while( nRet>0 && (s=queue_dequeue(data.queue_fifo,&len)))
+	while( nRet>0 && 
+	       (s = queue_block_dequeue(data.queue_fifo, &len, MAX_BUFF)))
 	{ 	nRet = write(data.fd[PIPE_PAREN_WRITE], s, len);
 		free(s);
 	}
 	nRet = 1;
-	while( nRet>0 && (s=queue_dequeue(data.queue_remote, &len)))
+	while( nRet>0 && 
+	       ( s = queue_block_dequeue(data.queue_remote, &len, MAX_BUFF)))
 	{ 	send(data.remote, s, len, 0);
 		free(s);
 	}
 	nRet = 1;
-	while(nRet>0 && (s=queue_dequeue(data.queue_local, &len)))
+	while(nRet>0 &&
+	       ( s = queue_block_dequeue( data.queue_local, &len, MAX_BUFF)))
 	{ 	send(data.local, s, len, 0);
 		free(s);
 	}
