@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.18 2003/01/19 19:56:51 juam Exp $
+ * $Id: main.c,v 1.19 2003/01/21 16:54:00 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -32,6 +32,7 @@
 #include <netdb.h>
 
 #include <unistd.h>
+#include <signal.h>
 
 #include "config.h"
 #include "main.h"
