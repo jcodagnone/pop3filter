@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.5 2002/06/18 17:03:38 juam Exp $
+ * $Id: main.c,v 1.6 2002/06/19 15:49:06 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -31,17 +31,10 @@
 
 #include <unistd.h>
 
+#include "main.h"
 #include "process.h"
 #include "trace.h"
 #include "newopt.h"
-
-struct opt
-{	short lport;		/* listening port */
-	short rport;		/* remote port    */
-	const char * server;	/* remote machine */
-	char *exec;		/* filter */
-	int fork;		/* go to background ? */
-};
 
 #ifndef VERSION 
  #define VERSION  "0.0.0"

@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.2 2002/06/18 15:58:55 juam Exp $
+ * $Id: process.c,v 1.3 2002/06/19 15:49:06 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -105,7 +105,7 @@ do_server_init( int local, int remote, char *dataptr,struct global *data,
  * async proxy loop (yes, This is ugly.)
  */
 int
-do_server(int local, int remote, void *dataptr )
+proxy_request ( struct opt *opt )
 {	struct global data;
 	char buf[MAX_BUFF];
 	string_t lstring,rstring;

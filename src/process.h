@@ -1,7 +1,7 @@
 #ifndef _PROCESS_H_
 #define _PROCESS_H_
 
-/* do_server()
+/* proxy_request
  * 	Do what ever the proxie do
  * Params
  * 	lsock	local socket 
@@ -11,7 +11,7 @@
  * 	TODO return
  */
 int
-do_server(int lsock, int rsock,void *data );
+proxy_request ( struct opt *opt );
 
 
 #endif
