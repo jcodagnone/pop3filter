@@ -1,2 +1,13 @@
 .cvsignore
 ChangeLog
+Makefile.in
+aclocal.m4
+autom4te.cache
+config.h.in
+config.log
+config.status
+configure
+configure.scan
+docs
+stamp-h.in
+stamp-h1

@@ -1,2 +1,4 @@
 .cvsignore
 ChangeLog
+Makefile.in
+Makefile
