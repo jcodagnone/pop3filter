@@ -3,7 +3,6 @@ List of nice things:
 I don't have a prioritty so if you want to add it just send a patch or tell me
 Who knows..maybe you are with luck.
 
- * make it callable from inetd.
  * add connection control thing (eg: accept conection only from here in from 9am
  | to 9 pm)
 
