@@ -10,3 +10,6 @@ configure.scan
 docs
 stamp-h.in
 stamp-h1
+Makefile
+config.h
+
