@@ -2,6 +2,10 @@
 #define _MAIN_H_
 #include "config.h"
 
+#ifndef VERSION 
+ #define VERSION  "0.0.0"
+#endif
+
 struct opt
 {	short lport;		/* listening port */
 	short rport;		/* remote port    */
