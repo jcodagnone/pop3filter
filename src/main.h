@@ -13,7 +13,7 @@ struct opt
 	const char *fstderr;	/* save child's stderr into a file */
 	char *exec;		/* filter */
 	int fork;		/* go to background ? */
-	
+	char *listen_addr;      /**< interfase where to bind */
 };
 
 #endif

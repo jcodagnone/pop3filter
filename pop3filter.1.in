@@ -30,6 +30,7 @@ pop3filter \- POP3 Transparent Proxy with filters support
 .RB [ \-\-help ] 
 .RB [ \-\-version ]
 .RB [ \-\-fork ]
+.RB [ \-\-listen \<address\> ]
 .IR rhost
 .RB remoteport 
 .IR lport
@@ -64,6 +65,8 @@ fork to the background
 .IP "\-e file"
 Append filter stderr output to 
 .I file
+.IP "\-\-listen \<address\>"
+bind only to the interface address
 
 .SH FILTERS
 TODO

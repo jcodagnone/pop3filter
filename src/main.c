@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.25 2004/04/29 04:39:45 juam Exp $
+ * $Id: main.c,v 1.26 2004/04/29 05:03:42 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 
 #include <unistd.h>
@@ -74,6 +75,7 @@ help ( void )
 	" -h   --help                 prints this message\n"
 	" -f   --fork                 fork to the background\n"
 	" -e file                     write filter stderr to file\n"
+	"      --listen <address>     listen to an specific interface\n"
 	"\n"
 	"Send bugs to <juam at users dot sourceforge dot net>\n"
 	"\n");
@@ -85,7 +87,7 @@ static void
 usage ( void )
 {
 	printf(
-"%s [-hVf] [-e file] [--help] [--version] [--fork] rhost rport lport [filter]\n",
+"%s [-hVf] [-e file] [--help] [--version] [--fork] [--listen <address>] rhost rport lport [filter]\n",
 	progname);
 
 	exit( EXIT_SUCCESS );
@@ -114,9 +116,11 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 	 /*04*/	{"fork",	OPT_NORMAL, 0,  OPT_T_FLAG,  NULL },
 	 /*05*/	{"f",		OPT_NORMAL, 1,  OPT_T_FLAG,  NULL },
 	 /*06*/	{"e",		OPT_NORMAL, 1,	OPT_T_GENER, NULL },
+	 /*07*/	{"listen",	OPT_NORMAL, 0,	OPT_T_GENER, NULL },
 	 	{NULL}
 	};	 lopt[4].data = lopt[5].data = (void *)  &(opt->fork);
 	         lopt[6].data = (void *) &(opt->fstderr);
+		 lopt[7].data = &(opt->listen_addr);
 	
 	assert( argv && opt );
 	memset(opt,0,sizeof(*opt) );
@@ -193,10 +197,9 @@ connectHost(const char *szServer, short port)
 	return sock;
 }
 
-/* Creates a listening socket on port `port'
- */
+/** creates a listening socket on port `port' on listen_addr (if != null) */
 static int
-createServer(short port)
+pop3filter_socket_listen(const char *listen_addr, short port)
 {	struct sockaddr_in servAddr;
 	int sd;
 
@@ -209,8 +212,18 @@ createServer(short port)
  
 	/* bind server port */
 	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servAddr.sin_port = htons(port);
+	if( listen_addr ) 
+	{	if (!inet_aton(listen_addr, &servAddr.sin_addr))
+		{	rs_log_error("invalid IPv4 address: %s", listen_addr);
+			close(sd);
+			sd = -1;
+		}
+	
+	}
+	else
+		servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	
  
 	if(bind(sd, (struct sockaddr *) &servAddr, sizeof(servAddr))<0)
 	{	rs_log_error("binding socket: %s",strerror(errno));
@@ -309,7 +322,7 @@ standalone_server( const struct opt *opt)
 	int server, local;
 	int ret = EXIT_FAILURE;
 	
-	if( (server = createServer( opt->lport )) < 0 )
+	if( (server = pop3filter_socket_listen(opt->listen_addr, opt->lport))<0)
 		ret = EXIT_FAILURE;
 	else {	
 		serverSocket = server;	
