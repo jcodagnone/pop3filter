@@ -29,9 +29,9 @@ pop3filter \- POP3 Transparent Proxy with filters support
 .RB [ \-\-help ] 
 .RB [ \-\-version ]
 .RB [ \-\-fork ]
-.IR lport
 .IR rhost
 .RB remoteport 
+.IR lport
 [
 .IR filter
 ]
@@ -39,14 +39,14 @@ pop3filter \- POP3 Transparent Proxy with filters support
 
 .SH ARGUMENTS
 .TP
-.IR lport
-local port to bind and listen
-.TP
 .IR rhost
 remote host to connect (the POP3 server)
 .TP
 .IR remoteport	
 remote port to connect (usually 110)
+.TP
+.IR lport
+local port to bind and listen
 .TP
 .IR filter
 program that will filter the messages. If none is selected the message is
@@ -96,7 +96,7 @@ at the port
 .IP \(bu 4 
 Say you want just to set up the proxy at the port 11011 with no \
 filter.
-.EXAMPLE "pop3filter 11011 pop3.isp.net 110"
+.EXAMPLE "pop3filter pop3.isp.net 110 11011"
 
 .IP \(bu
 Now you want to catch all request on your network going to 
@@ -106,18 +106,23 @@ so the thing goes transparent. If you use Linux(\*(Tm) 2.4, with Netfilter:
 
 .IP  \(bu
 Now you want to leave the program running as a daemon?
-.EXAMPLE "pop3filter -f 11011 pop3.isp.net 110 "
+.EXAMPLE "pop3filter -f pop3.isp.net 110 11011 "
 
 .IP \(bu
 Lets do some filtering. Filter can be another file or just an `in-line' \ 
 expression:
-.EXAMPLE "pop3filter 11011 pop3.isp.net 110 'grep -v ^Date: ' "
+.EXAMPLE "pop3filter pop3.isp.net 110 11011 'grep -v ^Date: ' "
 (yes. nobody wants to do that, but is just an example)
 
 .IP \(bu
 Want to add some anti-spam header and rename dangerous attachments? You can 
 use a filter  something like:
 .EXAMPLE "$BASE/bin/spamc -p 11012 | $BASE/renattach -s -g"
+
+.IP \(bu
+This program runs also from inetd. All errors and information goes to syslog.
+In your inetd.conf put something like:
+.EXAMPLE "11011 stream tcp nowait nobody /usr/bin/pop3filter pop3filter pop3.isp.net 110  110011  /tmp/filter"
 
 .B Note
 that the filter can be called several times at the same time (multiple
