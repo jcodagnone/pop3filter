@@ -22,6 +22,11 @@
  * special type of queue: you enqueue data stream, and you dequeue blocks of
  * of that data (of BLOCKSIZE size)
  */
+
+#ifdef HAVE_CONFIG_H
+    #include <config.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>

@@ -15,4 +15,5 @@ pop3filter_SOURCES =	access.c	\
 			string.c	\
 			mstring.h	\
 			queue.c  	\
-			queue.h  	
+			queue.h  	\
+			daemon.c

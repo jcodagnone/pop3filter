@@ -17,6 +17,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+#ifdef HAVE_CONFIG_H
+   #include <config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,9 +36,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-
 #include <unistd.h>
 #include <signal.h>
+#ifdef HAVE_SYSLOGD
+ #include <syslogd.h>
+#endif
 
 #include <libcrash/sigsegv.h>
 
@@ -43,9 +50,6 @@
 #include "trace.h"
 #include "newopt.h"
 
-#ifdef HAVE_SYSLOGD
- #include <syslogd.h>
-#endif
 
 const char *rs_program_name; 	/* for the logs */
 const char *progname;
@@ -75,6 +79,8 @@ help ( void )
 	" -f   --fork                 fork to the background\n"
 	" -e file                     write filter stderr to file\n"
 	"      --listen <address>     listen to an specific interface\n"
+	"      --user   <username>    run server as user <username>\n"
+	"      --group  <groupname>   run server as group <groupname>\n"
 	"\n"
 	"Send bugs to <juam at users dot sourceforge dot net>\n"
 	"\n");
@@ -116,10 +122,14 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 	 /*05*/	{"f",		OPT_NORMAL, 1,  OPT_T_FLAG,  NULL },
 	 /*06*/	{"e",		OPT_NORMAL, 1,	OPT_T_GENER, NULL },
 	 /*07*/	{"listen",	OPT_NORMAL, 0,	OPT_T_GENER, NULL },
+	 /*08*/	{"user",	OPT_NORMAL, 0,	OPT_T_GENER, NULL },
+	 /*09*/	{"group",	OPT_NORMAL, 0,	OPT_T_GENER, NULL },
 	 	{NULL}
 	};	 lopt[4].data = lopt[5].data = (void *)  &(opt->fork);
 	         lopt[6].data = (void *) &(opt->fstderr);
 		 lopt[7].data = &(opt->listen_addr);
+		 lopt[8].data = &(opt->username);
+		 lopt[9].data = &(opt->groupname);
 	
 	assert( argv && opt );
 	memset(opt,0,sizeof(*opt) );
@@ -149,21 +159,6 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 	return 0;
 }
 /***************************************************************************/
-static void
-open_syslogd(void)
-{
-	#ifdef HAVE_SYSLOGD
-		openlog(progname, LOG_PID, LOG_DAEMON);
-	#endif
-}
-
-static void
-close_syslogd(void)
-{
-	#ifdef HAVE_SYSLOGD
-		closelog();
-	#endif
-}
 
 /* Creates a socket to `szServer:port'
  */
@@ -389,6 +384,12 @@ main( int argc, char **argv )
 	
 	if( parseOptions( argc, argv, &opt ) < 0 )
 		nRet = EXIT_FAILURE;
+	else if( (opt.username || opt.groupname) && 
+	    switch_to(opt.username, opt.groupname) == -1 )
+	{
+	    	rs_log_error("switching to username");
+		nRet = EXIT_FAILURE;
+	}
 	else if( is_a_socket(STDIN_FILENO))
 		nRet = inetd_server( &opt );
 	else

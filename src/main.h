@@ -14,6 +14,8 @@ struct opt
 	char *exec;		/* filter */
 	int fork;		/* go to background ? */
 	char *listen_addr;      /**< interfase where to bind */
+	char *username;         /**< username to run as */
+	char *groupname;        /**< groupname to run as */
 };
 
 #endif

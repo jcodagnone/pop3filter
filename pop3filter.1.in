@@ -67,7 +67,10 @@ Append filter stderr output to
 .I file
 .IP "\-\-listen \<address\>"
 bind only to the interface address
-
+.IP "\-\-user \<username\>"
+run server as user <username>
+.IP "\-\-group \<groupname\>"
+run server in group <groupname>
 .SH FILTERS
 TODO
 .PP

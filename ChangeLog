@@ -1,3 +1,92 @@
+2004-05-01 13:13  juam
+
+	* src/access.c: TODO target
+
+2004-05-01 12:41  juam
+
+	* src/process.c: more alpha transformations (proxy_delete ->
+	proxy_destroy)
+
+2004-05-01 12:33  juam
+
+	* src/process.c: style thing
+
+2004-05-01 12:32  juam
+
+	* src/: mstring.h, process.c, string.c:  o more comments
+	 o change string_cat to string_append
+
+2004-05-01 12:25  juam
+
+	* src/: main.c, pop.c, process.c, string.c: bye bye $Id: ChangeLog,v 1.3 2004/05/02 06:40:26 juam Exp $ tags
+
+2004-05-01 12:24  juam
+
+	* src/: mstring.h, process.c, string.c: conformity among the
+	functions names
+
+2004-05-01 12:07  juam
+
+	* src/: process.c, queue.c, queue.h: more comments
+
+2004-05-01 11:37  juam
+
+	* src/pop.c: The practice of programming style tip
+
+2004-05-01 11:32  juam
+
+	* src/main.c: log message on incomming connection
+
+2004-04-29 02:17  juam
+
+	* src/access.c: missing license
+
+2004-04-29 02:12  juam
+
+	* src/main.c: one exit point for pop3filter_socket_listen()
+
+2004-04-29 02:03  juam
+
+	* pop3filter.1.in, src/main.c, src/main.h: new option: --listen
+	<address>: listen only in the interface with that address
+
+2004-04-29 01:39  juam
+
+	* src/main.c: some comments for getOptions
+
+2004-04-29 01:34  juam
+
+	* src/main.c: one exit point for standalone_server()
+
+2004-04-29 01:29  juam
+
+	* src/main.c: one exit point for main()
+
+2004-04-29 01:23  juam
+
+	* lib/libcrash/.cvsignore: ignore some files
+
+2004-04-29 01:19  juam
+
+	* configure.in, lib/Makefile.am, lib/libcrash/Makefile.am,
+	lib/libcrash/Makefile.in, lib/libcrash/Makefile.mine,
+	lib/libcrash/README, lib/libcrash/sigsegv.c,
+	lib/libcrash/sigsegv.h, lib/libcrash/test1.c, lib/libcrash/test2.c,
+	lib/libcrash/test3.c, src/Makefile.am, src/main.c: add suport for
+	my libcrash library.
+
+2004-04-29 01:08  juam
+
+	* src/: Makefile.am, access.c: support build directories
+
+2003-08-03 14:43  juam
+
+	* ChangeLog, configure.in: new release: 0.5.3
+
+2003-08-03 14:38  juam
+
+	* lib/newopt.c: resync with localversion of libmisc
+
 2003-08-03 12:36  juam
 
 	* src/pop.c: user_getname(): bugfix for a silly sigsegv
