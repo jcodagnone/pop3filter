@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.4 2002/06/18 16:43:51 juam Exp $
+ * $Id: main.c,v 1.5 2002/06/18 17:03:38 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -198,9 +198,6 @@ createServer(short port)
 	return sd;
 }
 
-
-
-
 static int
 child( int local, struct opt *opt )
 {	int remote;
@@ -233,6 +230,27 @@ smart_fork( int local, struct opt *opt )
 	close(local);
 }
 
+static void
+fork_to_background ( void )
+{	pid_t pid;
+
+	pid = fork();
+	if( pid > 0 )
+		exit( EXIT_SUCCESS );
+	else if ( pid == -1 )
+		rs_log_error("going to the background: %s",strerror(errno));
+
+	rs_log_info("running in the background");
+	/* anythig else? */
+	freopen ("/dev/null", "r", stdin);
+	freopen ("/dev/null", "w", stdout);
+	/* freopen ("/dev/null", "w", stderr); */ /* we are login to stderr */
+	
+	setsid();
+	
+	return;
+}
+
 int
 main( int argc, char **argv )
 {	int server,local;
@@ -248,7 +266,10 @@ main( int argc, char **argv )
 
 	if( (server = createServer( opt.lport )) < 0 )
 		return EXIT_FAILURE;
-	
+
+	if( opt.fork )
+		fork_to_background();
+
 	size = sizeof(cliAddr);
 	while( (local=accept(server,(struct sockaddr *) &cliAddr,&size)) >=0 )
 		smart_fork(local,&opt);	
