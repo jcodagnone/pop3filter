@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.10 2003/06/04 13:34:47 juam Exp $
+ * $Id: process.c,v 1.11 2003/06/04 13:40:08 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-# include <sys/types.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -124,11 +124,12 @@ proxy_init( struct global *data,
  */
 int
 proxy_run( int local, int remote, struct opt *opt )
-{	struct global data;
+{	fd_set rfds, rback,  wfds, wback;
+	string_t local_str, remote_str;
+	struct global data;
 	char buf[MAX_BUFF];
-	string_t lstring, rstring;
 	int nRet=0;
-	fd_set rfds, rback,  wfds, wback;
+	
 	char *s;
 	size_t len;
 	
@@ -138,11 +139,11 @@ proxy_run( int local, int remote, struct opt *opt )
 	if( proxy_init(&data, local, remote, opt, &rfds, &wfds) == -1 )
 		return -1;
 
-	lstring = NewString();
-	rstring = NewString();
-	if( lstring == NULL || rstring == NULL )
-	{	FreeString(lstring);
-		FreeString(rstring);
+	local_str = NewString();
+	remote_str = NewString();
+	if( local_str == NULL || remote_str == NULL )
+	{	FreeString(local_str);
+		FreeString(remote_str);
 		proxy_delete(&data);
 
 		return -1;
@@ -170,12 +171,12 @@ proxy_run( int local, int remote, struct opt *opt )
 
 		/* read commands from local socket */
 		if( FD_ISSET(local,&rback) )
-			nRet = readsock(local, buf, sizeof(buf), lstring, &data,
+			nRet = readsock(local, buf, sizeof(buf), local_str, &data,
 			             pop_local_read);
 
 		/* read responces from pop3 server */
 		if( FD_ISSET(remote,&rback) )
-			nRet = readsock(remote, buf, sizeof(buf), rstring,
+			nRet = readsock(remote, buf, sizeof(buf), remote_str,
 			                &data, pop_remote_read);
 
 		/* write to sockets */
@@ -245,8 +246,8 @@ proxy_run( int local, int remote, struct opt *opt )
 	}
 		
 	proxy_delete(&data);
-	FreeString(lstring);
-	FreeString(rstring);
+	FreeString(local_str);
+	FreeString(remote_str);
 	
 	return 0;
 }
