@@ -1,7 +1,7 @@
 /*
  * newopt.c -- Command line options parser inspired in getopt(3)(in behavior)
  *
- * $Id: newopt.c,v 0.4 2002/06/26 21:50:57 juam Exp $
+ * $Id: newopt.c,v 0.5 2002/06/27 15:52:04 juam Exp $
  *
  * Copyright (C) 2001 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -189,7 +189,7 @@ do_sanity( struct global *data,char *const *argv,  const optionT *opt,
 	data->pt = NULL;
 	data->flags = flags;
 	data->reserved = reserved;
-	data->argv = clone_argv(argv);
+	data->argv = /*clone_argv(argv)*/ argv;
 
 	if( data->argv == NULL)
 		nRet = -1;
@@ -490,7 +490,7 @@ GetOptions( char *const *argv, optionT *table, unsigned flags, void *reserved )
 		}
 	}
 
-	free_argv((char **)data.argv);
+	/*free_argv((char **)data.argv);*/
 	return (fail || i != RET_END) ? -1:data.i;
 }
 
