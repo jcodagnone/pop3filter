@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2002/06/18 15:50:13 juam Exp $ 
+# $Id: Makefile,v 1.4 2002/06/18 17:14:12 juam Exp $ 
 
 CFLAGS = -Wall  -g -pedantic -pedantic-errors -I../lib
 OBJS = main.o pop.o process.o string.o
@@ -9,7 +9,7 @@ all: $(OBJS)
 	$(CC) $(OBJS) ../lib/libmisc.a  -o  $(OUT)
 
 clean:
-	- $(RM) $(OBJS) $(OUT)
+	- $(RM) $(OBJS) $(OUT) core 
 
 Changelog:	RCS/*
 		rcs2log > Changelog
