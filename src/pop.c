@@ -1,6 +1,6 @@
 /*
  * pop -- 
- * $Id: pop.c,v 1.3 2002/06/18 16:43:51 juam Exp $
+ * $Id: pop.c,v 1.4 2002/06/19 17:52:53 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -39,6 +39,8 @@
 
 #include <trace.h>
 #include "pop.h"
+#include "main.h"
+#include "itoa.h"
 
 #define MAX_POPCMD	76
 #define MAX_POP3_RESPONSE       80
@@ -47,11 +49,12 @@ struct cmd_table
 {	char *name;
 	enum cmds id;
 } table[] =
-{	{ "retr",	CMD_RETR},
+{	{ "user",	CMD_USER},
+	{ "retr",	CMD_RETR},
 	{ NULL,		CMD_UNKN}
 };
 
-static pid_t getfds(int *p, const char *exec );
+static pid_t getfds(int *p, const struct global *d);
 
 static char *
 ToLower( char *s )
@@ -147,6 +150,28 @@ retr_state( struct global *d, const char *buf, size_t len )
 	}
 }
 
+/* Get the users login name 
+ */
+static void
+user_getname(struct global *d, const char *buf)
+{	char *q;
+	unsigned i;
+	
+	q = strchr(buf,' ');
+	if( q )
+	{	for( ; *q && *q==' ' ; q++ )
+			;
+		for( i=0 ; i<sizeof(d->username) && 
+			   !isspace(d->username[i]=q[i]) ; i++)
+			;
+		if( i < sizeof(d->username) )
+			d->username[i] = '\0'; 
+		d->username[sizeof(d->username)-1] = '\0';
+	}
+	else
+		d->username[0] = '\0';
+}
+
 /* pop_local_read
  * 	reads POP3 commands
  * Params
@@ -160,24 +185,24 @@ pop_local_read( struct global  *d, const char *buf)
 	int ret = 0;
 
 	len = strlen(buf);
-	if( d->exec )
+	if( d->opt->exec )
 		d->last_cmd = ascii2cmd(buf);
 	else
 		d->last_cmd = CMD_UNKN;
 
-	if( d->last_cmd == CMD_RETR )
+	if( d->last_cmd == CMD_USER )
+		user_getname(d,buf);
+	else if( d->last_cmd == CMD_RETR )
 	{	d->retr= RT_RESPONSE;
-		d->pid = getfds(d->fd,d->exec);
+		d->pid = getfds(d->fd,d);
 		if( d->pid  == -1 )
 		{	pop3_error(d->local,"error execin' child");
 			d->last_cmd = 0;
 		}
-		else
-			send(d->remote,buf,len,0);
 
 	}
-	else
-		send(d->remote,buf,len,0);
+
+	send(d->remote,buf,len,0);
 
 	return ret;
 }
@@ -186,7 +211,6 @@ int
 pop_remote_read( struct global *d, const char *buf )
 {	int ret = 0;
 	int len;
-
 
 	d->failed = 0;
 	len = strlen(buf);
@@ -208,9 +232,25 @@ pop_remote_read( struct global *d, const char *buf )
 }
 
 /******************************************************************************/
+static void
+set_environment( const struct global *d )
+{	char buf[64]; 
+
+	#ifdef HAVE_SETENV
+	setenv("POP3_USERNAME",d->username,1);
+	setenv("POP3_SERVER",  d->opt->server,1);
+	setenv("POP3_RPORT",   itoa(d->opt->rport,buf,sizeof(buf)),1);
+	setenv("POP3_LPORT",   itoa(d->opt->lport,buf,sizeof(buf)),1);
+	setenv("POP3_VERSION", VERSION,1 );
+	/*setenv("POP3_NAME",    progname);
+	*setenv("POP3_NUMBER",  itoa(d->opt->retr_n),1);*/
+	
+	#endif
+}
+
 /* getfds()
  *	Opens 2 pipes for comunication between this process and
- *	what resuls of exec'ing 'exec'
+ *	what resuls of execing 'exec'
  * Params
  *	p		array of 4 ints. these would be the file descriptors
  *	exec		command line that is  exec with "bash -c"
@@ -219,11 +259,11 @@ pop_remote_read( struct global *d, const char *buf )
  *	>0		pid_t
  */
 static pid_t
-getfds(int *p, const char *exec )
+getfds(int *p, const struct global *d)
 {	pid_t pid;
 	unsigned i;
 	
-	if( p== NULL || exec == NULL ||  pipe(p) == -1 )
+	if( p== NULL || d->opt->exec == NULL ||  pipe(p) == -1 )
 		return -1;
 	if( pipe(p+2) == -1)
 	{	for( i = 0; i<2; i++)
@@ -250,7 +290,8 @@ getfds(int *p, const char *exec )
 		dup2(p[PIPE_PAREN_READ],0);
 		dup2(p[PIPE_CHILD_WRITE],1);
 
-		if( WEXITSTATUS(system(exec)));
+		set_environment( d );
+		if( WEXITSTATUS(system(d->opt->exec)));
 		{	
 			while(( (len=read(p[PIPE_PAREN_READ],buf,sizeof(buf)))
 				>0))

@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.3 2002/06/19 15:49:06 juam Exp $
+ * $Id: process.c,v 1.4 2002/06/19 17:52:53 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -35,8 +35,10 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "pop.h"
+#include "trace.h"
 #include "string.h"
+#include "pop.h"
+
 
 
 #define MAX_BUFF		4096
@@ -77,14 +79,15 @@ int (*p)(struct global  *, const char *) )
 
 
 static  void
-do_server_init( int local, int remote, char *dataptr,struct global *data,
+proxy_init( int local, int remote, struct opt *opt,struct global *data,
                  fd_set *r,fd_set *w,fd_set *e)
 {
 	data->local = local;
 	data->remote = remote;
 	data->last_cmd = 0;
-	data->exec = dataptr;
 	data->pid = 0;
+	data->opt = opt;
+	data->username[0] = '\0';
 
 	FD_ZERO(r);
 	FD_SET(local,r);
@@ -105,14 +108,14 @@ do_server_init( int local, int remote, char *dataptr,struct global *data,
  * async proxy loop (yes, This is ugly.)
  */
 int
-proxy_request ( struct opt *opt )
+proxy_request ( int local, int remote, struct opt *opt )
 {	struct global data;
 	char buf[MAX_BUFF];
 	string_t lstring,rstring;
 	int nRet=0;
 	fd_set rfds,rback,  wfds,wback, efds,eback;
 	
-	do_server_init(local,remote,dataptr,&data,&rfds,&wfds,&efds);
+	proxy_init(local,remote,opt,&data,&rfds,&wfds,&efds);
 	lstring = NewString();
 	rstring = NewString();
 	if( lstring == NULL || rstring == NULL )

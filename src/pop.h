@@ -4,8 +4,9 @@
 
 enum cmds
 {
-	CMD_RETR = 1,		/* command is RETR  */
-	CMD_UNKN = 2		/* unknown command; */
+	CMD_USER=1,		/* command is USER  */
+	CMD_RETR,		/* command is RETR  */
+	CMD_UNKN		/* unknown command; */
 };
 
 enum ST_RETR		/* RETR state machine */
@@ -26,14 +27,15 @@ enum {
  *	Global data to share across async calls
  */
 struct global
-{	int local,remote;	/* sockets */
+{	struct opt *opt ;	/* options */
+	int local,remote;	/* sockets */
 	int fd[4];		/* comunication pipes */
+	enum cmds last_cmd;	/* the last pop3 command */
+	char username[80];
+	/* RETR */
+	enum ST_RETR retr;	/* RETR state machine */
 	pid_t pid;		/* child process pid */
 	int failed;		/* */
-	enum cmds last_cmd;	/* the last pop3 command */
-	const char *exec;	/* command to exec to filter */
-	enum ST_RETR retr;	/* RETR state machine */
-	
 };
 
 

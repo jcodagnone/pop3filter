@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.6 2002/06/19 15:49:06 juam Exp $
+ * $Id: main.c,v 1.7 2002/06/19 17:52:53 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -36,9 +36,7 @@
 #include "trace.h"
 #include "newopt.h"
 
-#ifndef VERSION 
- #define VERSION  "0.0.0"
-#endif
+
 
 const char *rs_program_name; 	/* for the logs */
 const char *progname;
@@ -197,7 +195,7 @@ child( int local, struct opt *opt )
 
 	remote = connectHost(opt->server,opt->rport);
 	if( remote != -1 )
-		do_server(local,remote,opt->exec);
+		proxy_request(local,remote,opt);
 	close(local);
 	close(remote);
 
@@ -262,6 +260,7 @@ main( int argc, char **argv )
 
 	if( opt.fork )
 		fork_to_background();
+
 
 	size = sizeof(cliAddr);
 	while( (local=accept(server,(struct sockaddr *) &cliAddr,&size)) >=0 )

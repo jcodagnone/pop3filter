@@ -6,12 +6,12 @@
  * Params
  * 	lsock	local socket 
  * 	rsock	remote socket (server's socket)
- * 	data	extra data
+ * 	opt	program options
  * Return 
  * 	TODO return
  */
 int
-proxy_request ( struct opt *opt );
+proxy_request ( int lsock, int rsock, struct opt *opt );
 
 
 #endif
