@@ -1,6 +1,6 @@
 AM_CFLAGS = @CFLAGS@ -I$(srcdir)/../lib -Ddebug=1
 AM_LDFLAGS = @LDFLAGS@
-LIBS = @LIBS@ -L../lib -lmisc
+LIBS = @LIBS@ -L../lib -L../lib/libcrash -lmisc -lcrash
 
 bin_PROGRAMS = pop3filter
 

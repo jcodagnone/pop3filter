@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.21 2003/07/10 19:13:55 juam Exp $
+ * $Id: main.c,v 1.22 2004/04/29 04:19:00 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -23,6 +23,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+#include <signal.h>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -33,6 +34,8 @@
 
 #include <unistd.h>
 #include <signal.h>
+
+#include <libcrash/sigsegv.h>
 
 #include "config.h"
 #include "main.h"
@@ -355,6 +358,8 @@ main( int argc, char **argv )
 	open_syslogd();
 	progname = rs_program_name = *argv;
 	rs_trace_to(rs_trace_stderr); 
+
+	signal(SIGSEGV, sigsegv_handler_bt_full_fnc);
 	
 	if( parseOptions( argc, argv, &opt ) < 0 )
 		return EXIT_FAILURE;

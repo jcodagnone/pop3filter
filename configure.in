@@ -65,6 +65,7 @@ AC_OUTPUT([
 Makefile
 pop3filter.1
 lib/Makefile
+lib/libcrash/Makefile
 src/Makefile
 bin/Makefile
 doc/Makefile])
