@@ -31,8 +31,6 @@ AM_SANITY_CHECK
 
 # Checks for programs.
 AC_PROG_CC
-AC_MINGW32
-
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_RANLIB
@@ -40,28 +38,28 @@ AC_ISC_POSIX
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h string.h])
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(
+	[limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h sys/socket.h sys/time.h syslog.h unistd.h])
 
-dnl Only use -Wall if we have gcc
-if test "x$GCC" = "xyes"; then
-  if test -z "`echo "$CFLAGS" | grep "\-Wall" 2> /dev/null`" ; then
-    CFLAGS="$CFLAGS -Wall -W -ansi -Wnested-externs -Winline -Wno-unused -I ../../libmisc"
-  fi
-fi
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
 
-dnl --------------------------------------------------------------------------
-dnl Optionnal stuff
-dnl --------------------------------------------------------------------------
 
-LIBS="$LIBS -L../../libmisc -lmisc"
+# Checks for library functions.
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_TYPE_SIGNAL
+AC_FUNC_STRTOD
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([dup2 gethostbyname memset select setenv socket strchr strdup strerror strtol])
 
-dnl --------------------------------------------------------------------------
-dnl Substitutions
-dnl --------------------------------------------------------------------------
 AC_SUBST(PACKAGE)
 AC_SUBST(POP3FILTER_VERSION)
 AC_SUBST(POP3FILTER_DATE)
-
 
 AC_OUTPUT([
 Makefile
@@ -79,6 +77,6 @@ echo "     LIBS                          : $LIBS"
 echo "     Locales in use                : $ALL_LINGUAS"
 echo "==============================================================="
 echo
-echo "Type \"make\" to compile crafted."
+echo "Type \"make\" to compile pop3filter."
 echo
 

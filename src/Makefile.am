@@ -1,5 +1,6 @@
 AM_CFLAGS = @CFLAGS@ -I ../lib -Ddebug=1
-AM_LDFLAGS = @LDFLAGS@ -L ../lib
+AM_LDFLAGS = @LDFLAGS@ 
+LIBS = @LIBS@ -L ../lib -lmisc
 
 bin_PROGRAMS = pop3filter
 
@@ -13,4 +14,6 @@ pop3filter_SOURCES =	\
 			process.c	\
 			process.h	\
 			string.c	\
-			mstring.h
+			mstring.h	\
+			queue.c  	\
+			queue.h  	
