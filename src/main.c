@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.24 2004/04/29 04:34:50 juam Exp $
+ * $Id: main.c,v 1.25 2004/04/29 04:39:45 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -107,14 +107,14 @@ static int
 parseOptions( int argc, char * const * argv, struct opt *opt)
 {	int i;
 	static optionT lopt[]=
-	{	{"help",	OPT_NORMAL, 0,	OPT_T_FUNCT, (void *) help },
-		{"h",		OPT_NORMAL, 1,  OPT_T_FUNCT, (void *) help },
-		{"version",	OPT_NORMAL, 0,  OPT_T_FUNCT, (void *) version},
-		{"V",		OPT_NORMAL, 1,  OPT_T_FUNCT, (void *) version},
-		{"fork",	OPT_NORMAL, 0,  OPT_T_FLAG,  NULL },
-		{"f",		OPT_NORMAL, 1,  OPT_T_FLAG,  NULL },
-		{"e",		OPT_NORMAL, 1,	OPT_T_GENER, NULL },
-		{NULL}
+	{/*00*/	{"help",	OPT_NORMAL, 0,	OPT_T_FUNCT, (void *) help },
+	 /*01*/	{"h",		OPT_NORMAL, 1,  OPT_T_FUNCT, (void *) help },
+	 /*02*/	{"version",	OPT_NORMAL, 0,  OPT_T_FUNCT, (void *) version},
+	 /*03*/	{"V",		OPT_NORMAL, 1,  OPT_T_FUNCT, (void *) version},
+	 /*04*/	{"fork",	OPT_NORMAL, 0,  OPT_T_FLAG,  NULL },
+	 /*05*/	{"f",		OPT_NORMAL, 1,  OPT_T_FLAG,  NULL },
+	 /*06*/	{"e",		OPT_NORMAL, 1,	OPT_T_GENER, NULL },
+	 	{NULL}
 	};	 lopt[4].data = lopt[5].data = (void *)  &(opt->fork);
 	         lopt[6].data = (void *) &(opt->fstderr);
 	
