@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.14 2002/07/18 21:59:05 juam Exp $
+ * $Id: main.c,v 1.15 2002/07/23 17:50:44 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -204,11 +204,13 @@ createServer(short port)
  
 	if(bind(sd, (struct sockaddr *) &servAddr, sizeof(servAddr))<0)
 	{	rs_log_error("binding socket: %s",strerror(errno));
+		close(sd);
 	  	return -1;
 	}
 	
 	if( listen(sd,5) == -1 )
 	{	rs_log_error("listening socket: %s",strerror(errno));
+		close(sd);
 		return -1;
 	}
 	
