@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.27 2004/04/29 05:12:55 juam Exp $
+ * $Id: main.c,v 1.28 2004/05/01 14:32:11 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -339,9 +339,14 @@ standalone_server( const struct opt *opt)
 			fork_to_background();
 
 		size = sizeof(cliAddr);
-		while( (local = accept(server,(void *) &cliAddr,&size)) >=0 )
+		while( (local = accept(server,(void *) &cliAddr,&size)) >=0 ) 
+		{	rs_log_info("incomming connection from %s:%d",
+			             inet_ntoa(cliAddr.sin_addr),
+				     ntohs(cliAddr.sin_port));
+
 			smart_fork(local, opt);	
-	
+		}
+		
 		close(server);
 		ret = EXIT_SUCCESS;
 	}
