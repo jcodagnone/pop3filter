@@ -1,6 +1,6 @@
-# $Id: Makefile,v 1.12 2002/06/24 02:35:00 juam Exp $ 
+# $Id: Makefile,v 1.13 2002/06/27 15:56:38 juam Exp $ 
 
-CFLAGS = -Wall  -g -pedantic -pedantic-errors -I../lib -I..
+CFLAGS = -Wall  -g -pedantic -pedantic-errors -I../lib -I.. -Ddebug=1
 OBJS = main.o pop.o process.o string.o access.o
 OUT = pop3filter
 

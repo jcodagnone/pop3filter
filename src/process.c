@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.6 2002/06/23 23:51:15 juam Exp $
+ * $Id: process.c,v 1.7 2002/06/27 15:56:39 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -126,8 +126,8 @@ proxy_request ( int local, int remote, struct opt *opt )
 		FreeString(rstring);
 		return -1;
 	}
+
 	rback=rfds, eback=efds, wback=wfds;
-	
 	while( nRet != -1 && select(FD_SETSIZE,&rback,NULL,&eback,NULL)>0 )
 	{	
 		/* check the pipe first    */

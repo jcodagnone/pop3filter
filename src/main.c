@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.11 2002/06/23 23:51:15 juam Exp $
+ * $Id: main.c,v 1.12 2002/06/27 15:56:39 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -61,19 +61,19 @@ help ( void )
 	" -V   --version              print the version info and dies\n"
 	" -h   --help                 prints this message\n"
 	" -f   --fork                 fork to the background\n"
+	" -e file                     write filter stderr to file\n"
 	"\n"
 	"Send bugs to <juam at users dot sourceforge dot net>\n"
 	"\n",progname);
 
 	exit( EXIT_SUCCESS );
-
 }
 
 static void 
 usage ( void )
 {
 	printf(
-"%s [-hvf] [--help] [--version] [--fork] rhost remoteport lport [filter]\n",
+"%s [-hvf] [-e file] [--help] [--version] [--fork] rhost rport lport [filter]\n",
 	progname);
 
 	exit( EXIT_SUCCESS );
@@ -101,8 +101,10 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 		{"V",		OPT_NORMAL, 1,  OPT_T_FUNCT, (void *) version},
 		{"fork",	OPT_NORMAL, 0,  OPT_T_FLAG,  NULL },
 		{"f",		OPT_NORMAL, 1,  OPT_T_FLAG,  NULL },
+		{"e",		OPT_NORMAL, 1,	OPT_T_GENER, NULL },
 		{NULL}
-	};	 lopt[5].data = lopt[6].data = (void *)  &(opt->fork);
+	};	 lopt[4].data = lopt[5].data = (void *)  &(opt->fork);
+	         lopt[6].data = (void *) &(opt->fstderr);
 	
 	assert( argv && opt );
 	memset(opt,0,sizeof(*opt) );
@@ -115,8 +117,6 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 	{	usage();
 		return -1;
 	}
-
-	
 	opt->server =       argv[i+0]  ;
 	opt->rport  = atoi( argv[i+1] );
 	opt->lport  = atoi( argv[i+2] );
@@ -258,7 +258,6 @@ fork_to_background ( void )
 	freopen ("/dev/null", "w", stdout);
 	freopen ("/dev/null", "w", stderr);
 	
-	
 	setsid();
 
 	rs_log_info("running in the background");
@@ -277,7 +276,7 @@ standalone_server( const struct opt *opt)
 
 	if( opt->fork )
 		fork_to_background();
-		
+
 	size = sizeof(cliAddr);
 	while( (local=accept(server,(struct sockaddr *) &cliAddr,&size)) >=0 )
 		smart_fork(local,opt);	
@@ -320,7 +319,7 @@ main( int argc, char **argv )
 	
 	if( parseOptions( argc, argv, &opt ) < 0 )
 		return EXIT_FAILURE;
-
+	
 	if( is_a_socket(STDIN_FILENO))
 		nRet = inetd_server( &opt );
 	else

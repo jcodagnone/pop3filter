@@ -1,6 +1,6 @@
 /*
  * pop -- 
- * $Id: pop.c,v 1.5 2002/06/22 22:42:13 juam Exp $
+ * $Id: pop.c,v 1.6 2002/06/27 15:56:39 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -262,7 +262,7 @@ static pid_t
 getfds(int *p, const struct global *d)
 {	pid_t pid;
 	unsigned i;
-	
+
 	if( p== NULL || d->opt->exec == NULL ||  pipe(p) == -1 )
 		return -1;
 	if( pipe(p+2) == -1)
@@ -290,6 +290,11 @@ getfds(int *p, const struct global *d)
 		dup2(p[PIPE_PAREN_READ],0);
 		dup2(p[PIPE_CHILD_WRITE],1);
 
+		if( d->opt->fstderr )
+		{	if( freopen( d->opt->fstderr, "a", stderr) == NULL)
+				freopen ("/dev/null", "w", stderr);
+		}
+
 		set_environment( d );
 		if( WEXITSTATUS(system(d->opt->exec)));
 		{	
@@ -304,7 +309,7 @@ getfds(int *p, const struct global *d)
 		close(p[PIPE_PAREN_READ]);
 		close(p[PIPE_CHILD_WRITE]);
 	}
-
+	
 	return pid;
 }
 

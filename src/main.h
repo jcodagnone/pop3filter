@@ -10,8 +10,10 @@ struct opt
 {	short lport;		/* listening port */
 	short rport;		/* remote port    */
 	const char * server;	/* remote machine */
+	const char *fstderr;	/* save child's stderr into a file */
 	char *exec;		/* filter */
 	int fork;		/* go to background ? */
+	
 };
 
 #endif
