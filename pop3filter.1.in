@@ -112,6 +112,7 @@ Now you want to catch all request on your network going to
 .B pop3.isp.net 
 so the thing goes transparent. If you use Linux(\*(Tm) 2.4, with Netfilter:
 .EXAMPLE "/usr/sbin/iptables \-t nat \-A PREROUTING \-i eth0 \-p tcp \-d \
+pop3.isp.net --dport 110 -j REDIRECT --to 11011
 
 .IP  \(bu
 Now you want to leave the program running as a daemon?
