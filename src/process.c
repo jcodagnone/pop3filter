@@ -39,8 +39,9 @@
 #include "pop.h"
 #include "access.h"
 
-
-#define MAX_BUFF	4096
+enum {
+	MAX_BUFF = 4096
+};
 
 /* read data from a socket an process it
  *
