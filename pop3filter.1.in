@@ -17,7 +17,7 @@
 .RE
 ..
 
-.TH POP3FILTER @VERSION@ @DATE@
+.TH POP3FILTER @VERSION@ @POP3FILTER_DATE@
 .LO 1
 .SH NAME
 pop3filter \- POP3 Transparent Proxy with filters support
@@ -93,7 +93,7 @@ Version of pop3filter. Eg: 0.0.1
 
 .SH NOTES
 When you kill the server (when running as a stand alone server) the child
-process (active clients) are not killed so the can finish their transaccions.
+process (active clients) are not killed so they can finish their transaccions.
 I found this like a good behavior. Tell me your opinion if you do not agree.
 
 .SH EXAMPLES
