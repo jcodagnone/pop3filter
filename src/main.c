@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.9 2002/06/20 02:39:05 juam Exp $
+ * $Id: main.c,v 1.10 2002/06/22 22:18:31 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -45,13 +45,13 @@ const char *progname;
 static void
 help ( void )
 {	printf (
-	"Usage: %s [OPTION] lport server rport [filter]\n"
+	"Usage: %s [OPTION] server rport lport [filter]\n"
 	"Creates a POP3 proxy using filter if available\n"
 	"\n"
 	"ARGUMENTS\n"
-	"        lport               local port to listen connections\n"
 	"        server              server to connect\n"
 	"        rport               remote port to connect\n"
+	"        lport               local port to listen connections\n"
 	"        filter              command that filters a message\n"
 	"\n"
 	"OPTIONS\n"
@@ -71,7 +71,7 @@ static void
 usage ( void )
 {
 	printf(
-"%s [-hvf] [--help] [--version] [--fork] lport rhost remoteport [filter]\n",
+"%s [-hvf] [--help] [--version] [--fork] rhost remoteport lport [filter]\n",
 	progname);
 
 	exit( EXIT_SUCCESS );
@@ -114,9 +114,10 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 		return -1;
 	}
 
-	opt->lport  = atoi( argv[i] );
-	opt->server = argv[i+1];
-	opt->rport  = atoi( argv[i+2] );
+	
+	opt->server =       argv[i+0]  ;
+	opt->rport  = atoi( argv[i+1] );
+	opt->lport  = atoi( argv[i+2] );
 	opt->exec = ( argc - i >= 4 ) ? argv[i+3] : NULL;
 
 	if( opt->lport==0 || opt->rport == 0)
