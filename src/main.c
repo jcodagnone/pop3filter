@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.20 2003/06/04 13:34:47 juam Exp $
+ * $Id: main.c,v 1.21 2003/07/10 19:13:55 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -131,6 +131,10 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 	opt->lport  = atoi( argv[i+2] );
 	opt->exec = ( argc - i >= 4 ) ? argv[i+3] : NULL;
 
+	if( argc - i >= 5 )
+		rs_log_warning("parameters after the filter. "
+		               "If they are for the filter please escape them");
+		
 	if( opt->lport==0 || opt->rport == 0)
 	{	rs_log_error("error port numbers are not integers");
 		usage();
