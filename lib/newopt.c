@@ -1,7 +1,7 @@
 /*
  * newopt.c -- Command line options parser inspired in getopt(3)(in behavior)
  *
- * $Id: newopt.c,v 0.5 2002/06/27 15:52:04 juam Exp $
+ * $Id: newopt.c,v 0.6 2003/08/03 17:38:57 juam Exp $
  *
  * Copyright (C) 2001 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -27,7 +27,7 @@
 #include <limits.h>	/* for types conversion */
 
 #include <assert.h>
-#include <debug.h>
+#include <trace.h>
 
 #include <strdup.h>
 #include "newopt.h"
@@ -59,8 +59,9 @@ report( unsigned flags, const char *fmt,...)
 {	va_list ap;
 	
 	if( !(flags & OPT_F_QUIET) )
-	{	va_start(ap,fmt);
-		fprintf(stderr,_("GetOptions: "));
+	{	
+		va_start(ap,fmt);
+		fprintf(stderr,_("%s: "), rs_program_name);
 		vfprintf(stderr,fmt,ap);
 		fprintf(stderr,"\n");
 		va_end(ap); 
@@ -75,12 +76,12 @@ report( unsigned flags, const char *fmt,...)
  * is 'str' alphabetic?
  */
 static int
-buffIsAlpha( const char *str )
+buffIsValid( const char *str )
 {	
-	if( str == NULL )
+	if( str == NULL || str[0]=='-' || str[0] =='_' )
 		return 0;
 
-	for( ; *str && isalpha(*str) ;str++)
+	for( ; *str && (isalpha(*str)||*str=='-'||*str=='_') ;str++)
 		;
 
 	return !*str;
@@ -118,7 +119,7 @@ check_table( const optionT * opt )
 
 	assert( opt );
 
-	for( i=0; opt[i].name && buffIsAlpha(opt[i].name) &&
+	for( i=0; opt[i].name && buffIsValid(opt[i].name) &&
 	     valid_type(opt[i].type) && valid_flag(opt[i].flags) ; i++ )
 		;
 
