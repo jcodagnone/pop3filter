@@ -4,7 +4,7 @@
 typedef struct queueHead * queue_t;
 
 queue_t queue_new(void);
-void queue_delete(queue_t q);
+void queue_destroy(queue_t q);
 
 int queue_is_valid(queue_t q);
 int queue_is_empty(queue_t q);

@@ -1,6 +1,5 @@
 /*
- * queue.c - data queue
- * $Id: queue.c,v 1.3 2003/06/04 16:33:15 juam Exp $
+ * queue.c - implements an special type of queue. 
  *
  * Copyright (C) 2003 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -19,6 +18,10 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+/**
+ * special type of queue: you enqueue data stream, and you dequeue blocks of
+ * of that data (of BLOCKSIZE size)
+ */
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -29,15 +32,22 @@
 
 #define IS_QUEUE(t) (t!=NULL)
 
+enum {
+	DEQUEUE_BLOCK = 4096
+};
+
+
+/** queue node */
 struct node
-{	size_t length;
-	void *data;
+{	void *data;
+	size_t length;
 	struct node *next;
 };
 
+/** Concrete Data Type */
 struct queueHead
-{	struct node *head;
-	struct node *tail;
+{	struct node *head;      /**< the queue's  head */
+	struct node *tail;      /**< the queue's  end  */
 };
 
 queue_t
@@ -60,7 +70,7 @@ queue_is_valid(queue_t q)
 }
 
 void
-queue_delete(queue_t q)
+queue_destroy(queue_t q)
 {	struct node *node, *next;
 
 	if( IS_QUEUE(q) )
@@ -109,8 +119,8 @@ queue_enqueue(queue_t q, const void *data, size_t len)
 	return ret;
 }
 
-#define DEQUEUE_BLOCK 4096
 
+/* how many blocks i need to use to get max characters? */
 static int
 get_needed_nodes_to_fill_block( queue_t q, unsigned max, unsigned *real)
 {	struct node *node;

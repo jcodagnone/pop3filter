@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.12 2003/06/04 16:40:51 juam Exp $
+ * $Id: process.c,v 1.13 2004/05/01 15:07:35 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -83,9 +83,9 @@ read_and_process( int socket, char *buff, size_t size,
 static void
 proxy_delete( struct global *data )
 {
-	queue_delete(data->queue_fifo);
-	queue_delete(data->queue_remote);
-	queue_delete(data->queue_local );
+	queue_destroy(data->queue_fifo);
+	queue_destroy(data->queue_remote);
+	queue_destroy(data->queue_local );
 }
 
 static int
