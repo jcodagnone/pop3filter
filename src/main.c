@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.22 2004/04/29 04:19:00 juam Exp $
+ * $Id: main.c,v 1.23 2004/04/29 04:29:05 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -353,18 +353,18 @@ is_a_socket(int fd)
 int
 main( int argc, char **argv )
 {	struct opt opt;
-	int nRet;
+	int nRet = EXIT_SUCCESS;
 
+	/* logger support */
 	open_syslogd();
 	progname = rs_program_name = *argv;
 	rs_trace_to(rs_trace_stderr); 
-
+	
 	signal(SIGSEGV, sigsegv_handler_bt_full_fnc);
 	
 	if( parseOptions( argc, argv, &opt ) < 0 )
-		return EXIT_FAILURE;
-	
-	if( is_a_socket(STDIN_FILENO))
+		nRet = EXIT_FAILURE;
+	else if( is_a_socket(STDIN_FILENO))
 		nRet = inetd_server( &opt );
 	else
 		nRet = standalone_server( &opt );
