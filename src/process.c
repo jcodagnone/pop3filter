@@ -1,5 +1,5 @@
 /*
- * process -- 
+ * process -- the main loop
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -81,7 +81,7 @@ read_and_process( int socket, char *buff, size_t size,
 }
 
 static void
-proxy_delete( struct global *data )
+proxy_destroy( struct global *data )
 {
 	queue_destroy(data->queue_fifo);
 	queue_destroy(data->queue_remote);
@@ -115,7 +115,7 @@ proxy_init( struct global *data,
 	    ! queue_is_valid(data->queue_remote) ||
 	    ! queue_is_valid(data->queue_local ) )
 	{	
-		proxy_delete(data);
+		proxy_destroy(data);
 		return -1;
 	}
 
@@ -124,6 +124,8 @@ proxy_init( struct global *data,
 
 /*
  * async proxy loop (yes, This is ugly.)
+ *
+ * i don't program like this any more!
  */
 int
 proxy_run( int local, int remote, struct opt *opt )
@@ -146,7 +148,7 @@ proxy_run( int local, int remote, struct opt *opt )
 	if( local_str == NULL || remote_str == NULL )
 	{	string_destroy(local_str);
 		string_destroy(remote_str);
-		proxy_delete(&data);
+		proxy_destroy(&data);
 
 		return -1;
 	}
@@ -160,7 +162,7 @@ proxy_run( int local, int remote, struct opt *opt )
 		    FD_ISSET(data.fd[PIPE_CHILD_READ], &rback) )
 			nRet = pop_child_read(&data, buf, sizeof(buf));
 			
-		/* write to the filter process */
+		/* write to the filter process  */
 		if( data.fd[PIPE_PAREN_WRITE] != -1 &&
 		    FD_ISSET( data.fd[PIPE_PAREN_WRITE], &wback) )
 		{	
@@ -251,7 +253,7 @@ proxy_run( int local, int remote, struct opt *opt )
 		free(s);
 	}
 		
-	proxy_delete(&data);
+	proxy_destroy(&data);
 	string_destroy(local_str);
 	string_destroy(remote_str);
 	
