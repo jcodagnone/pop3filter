@@ -1,5 +1,5 @@
 /*
- * $Id: newopt.h,v 1.1 2001/09/30 15:52:50 juam Exp $
+ * $Id: newopt.h,v 1.2 2001/10/01 03:48:09 juam Exp $
  *
  * Command line options parser inspired in getopt(3) but unlike that,
  * this _is_ THREAD SAFE
@@ -20,11 +20,14 @@ enum optflagsT
 /* diferent types of variables
  */
 enum optTypeT
-{	OPT_T_FLAG,		/* arg is a flag. set to 0 or 1 */
+{
+	OPT_T_FLAG,		/* arg is a flag. is set to 1 if exist*/
+	OPT_T_NFLAG,		/* arg is a flag. is set to 0 if exist*/
+	OPT_T_FUNCT,		/* call a function */
+
 	OPT_T_INT,		/* arg is an int */
 	OPT_T_LONG,		/* arg is a long */
-	OPT_T_FLOAT,		/* arg is a float */
-	OPT_T_FUNCT,		/* no store the value. call function */
+	OPT_T_REAL,		/* arg is a double */
 	OPT_T_GENER,		/* don't treat argument, pass the char */
 	OPT_T_INVALID		/* dont't use it */
 };
@@ -35,7 +38,7 @@ typedef enum opt_flags
 	/*
 	 * Not Yet!
 	 */
-	OPT_F_ERROR=2U,		/* for error handling use reserved */
+	OPT_F_ERROR=2U,		/* for error handling use reserved functions */
 	OPT_F_FFILE=4U,		/* options can be read from a file
 				 * set in param */
 	OPT_F_INVALID
@@ -49,13 +52,13 @@ typedef enum opt_flags
  *
  * arg:		one of these
  *			OPT_NORMAL:
- *			OPT_OPTIONAL:
+ *			OPT_OPTIONAL: not yet
  *
- * short_opt:	short if it the option is a short option
+ * short_opt:	true if it the option is a short option
  *
  * type:	class of the argument
  *
- * data:	data were to store the argument
+ * data:	pointer where to store the argument
  */		
 typedef struct _opt
 {	const char *name;
