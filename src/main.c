@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.19 2003/01/21 16:54:00 juam Exp $
+ * $Id: main.c,v 1.20 2003/06/04 13:34:47 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -158,7 +158,7 @@ close_syslogd(void)
 /* Creates a socket to `szServer:port'
  */
 static int
-connectHost(const char *szServer,short port)
+connectHost(const char *szServer, short port)
 { 	struct sockaddr_in server;
 	struct hostent *hp;
 	int sock;
@@ -179,7 +179,7 @@ connectHost(const char *szServer,short port)
 
 	server.sin_port = htons((short) port );
 	if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0)
-	{	rs_log_error("connectig to `%s': %s",szServer,strerror(errno));
+	{	rs_log_error("connectig to `%s': %s",szServer, strerror(errno));
 		return -1;
 	}
 
@@ -226,9 +226,9 @@ static int
 child( int local, const struct opt *opt )
 {	int remote;
 
-	remote = connectHost(opt->server,opt->rport);
+	remote = connectHost(opt->server, opt->rport);
 	if( remote != -1 )
-		proxy_request(local,remote,opt);
+		proxy_run(local, remote, opt);
 	close(local);
 	close(remote);
 
@@ -249,9 +249,9 @@ smart_fork( int local, const struct opt *opt )
 		if( pid != 0 )
 			exit(0);
 		else
-		{	signal(SIGTERM,SIG_DFL);
-			signal(SIGINT,SIG_DFL);
-			child(local,opt);
+		{	signal(SIGTERM, SIG_DFL);
+			signal(SIGINT, SIG_DFL);
+			child(local, opt);
 		}
 	}
 	wait(NULL);
@@ -299,7 +299,7 @@ static int
 standalone_server( const struct opt *opt)
 { 	socklen_t size;
 	struct sockaddr_in cliAddr;
-	int server,local;
+	int server, local;
 
 	if( (server = createServer( opt->lport )) < 0 )
 		return EXIT_FAILURE;
@@ -313,7 +313,7 @@ standalone_server( const struct opt *opt)
 
 	size = sizeof(cliAddr);
 	while( (local=accept(server,(struct sockaddr *) &cliAddr,&size)) >=0 )
-		smart_fork(local,opt);	
+		smart_fork(local, opt);	
 	
 	close(server);
 

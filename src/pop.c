@@ -1,6 +1,6 @@
 /*
  * pop -- 
- * $Id: pop.c,v 1.7 2003/01/19 19:56:51 juam Exp $
+ * $Id: pop.c,v 1.8 2003/06/04 13:34:47 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -42,7 +42,6 @@
 #include "main.h"
 #include "itoa.h"
 
-#define MAX_POPCMD      	76
 #define MAX_POP3_RESPONSE       80
 
 struct cmd_table
@@ -68,7 +67,7 @@ ToLower( char *s )
 
 enum cmds 
 ascii2cmd ( const char *p )
-{	unsigned i,j,bye;
+{	unsigned i, j, bye;
 	char *q;
 	enum cmds ret = CMD_UNKN;
 
@@ -87,7 +86,7 @@ ascii2cmd ( const char *p )
 
 		ToLower( q );
 		for( bye=0,j=0; !bye && table[j].name ; j++ )
-		{	if( strncmp(q,table[j].name,i) == 0 )
+		{	if( strncmp(q, table[j].name, i) == 0 )
 			{	ret = table[j].id ;
 				bye = 1;
 			}
@@ -108,7 +107,7 @@ retr_state( struct global *d, const char *buf, size_t len )
 {
 	switch( d->retr )
 	{	case RT_RESPONSE:
-			if( queue_enqueue(d->queue_local,buf,len) == -1 ||
+			if( queue_enqueue(d->queue_local, buf, len) == -1 ||
 			    (len && buf[0]=='-'))
 			{	d->failed = 1;
 				d->retr = RT_END;
@@ -121,7 +120,7 @@ retr_state( struct global *d, const char *buf, size_t len )
 				d->retr = RT_END;
 			else
 			{	
-				if( queue_enqueue(d->queue_fifo,buf,len) == -1)
+				if(queue_enqueue(d->queue_fifo, buf, len) == -1)
 					d->retr = RT_END;
 			}		
 			break;
@@ -133,23 +132,24 @@ retr_state( struct global *d, const char *buf, size_t len )
 	}
 }
 
-/* Get the users login name 
- */
+/** Get the users login name */
 static void
 user_getname(struct global *d, const char *buf)
 {	char *q;
 	unsigned i;
-	
+
+	for( ; isspace(buf) ; buf++)
+		;
 	q = strchr(buf,' ');
 	if( q )
-	{	for( ; *q && *q==' ' ; q++ )
+	{	/* eat multiple spaces */
+		for( ; *q && *q==' ' ; q++ )
 			;
-		for( i=0 ; i<sizeof(d->username) && 
-			   !isspace(d->username[i]=q[i]) ; i++)
-			;
-		if( i < sizeof(d->username) )
-			d->username[i] = '\0'; 
-		d->username[sizeof(d->username)-1] = '\0';
+		/* copy username */	
+		for( i=0 ; i < sizeof(d->username) && !isspace(q[i]) ; i++)
+			d->username[i]=q[i];
+			
+		d->username[i] = '\0'; 
 	}
 	else
 		d->username[0] = '\0';
@@ -175,13 +175,14 @@ pop_local_read( struct global  *d, const char *buf)
 		d->last_cmd = CMD_UNKN;
 
 	if( d->last_cmd == CMD_USER )
-		user_getname(d,buf);
+		user_getname(d , buf);
 	else if( d->last_cmd == CMD_RETR )
-	{	d->retr= RT_RESPONSE;
-		pid = getfds(d->fd,d);
+	{	
+		d->retr= RT_RESPONSE;
+		pid = getfds(d->fd, d);
 		if( pid  == -1 )
-		{	char s[]="error execin' child";
-			queue_enqueue(d->queue_local,s,sizeof(s));
+		{	char s[] = "error execin' child";
+			queue_enqueue(d->queue_local, s, sizeof(s));
 			d->last_cmd = 0;
 		}
 
@@ -200,10 +201,9 @@ pop_remote_read( struct global *d, const char *buf )
 	len = strlen(buf);
 	
 	if( d->last_cmd == CMD_RETR )
-		retr_state(d,buf,len);
+		retr_state(d, buf, len);
 	else
-	{
-		if( queue_enqueue(d->queue_local,buf,len) == -1 )
+	{ 	if( queue_enqueue(d->queue_local, buf, len) == -1 )
 			ret = -1;
 	}
 
@@ -218,8 +218,8 @@ set_environment( const struct global *d )
 	#ifdef HAVE_SETENV
 	setenv("POP3_USERNAME",d->username,1);
 	setenv("POP3_SERVER",  d->opt->server,1);
-	setenv("POP3_RPORT",   itoa(d->opt->rport,buf,sizeof(buf)),1);
-	setenv("POP3_LPORT",   itoa(d->opt->lport,buf,sizeof(buf)),1);
+	setenv("POP3_RPORT",   itoa(d->opt->rport, buf, sizeof(buf)),1);
+	setenv("POP3_LPORT",   itoa(d->opt->lport, buf, sizeof(buf)),1);
 	setenv("POP3_VERSION", VERSION,1 );
 	
 	#endif
@@ -277,9 +277,9 @@ getfds(int *p, const struct global *d)
 		exec_status = system(d->opt->exec);
 		if( WEXITSTATUS(exec_status) )
 		{	
-			while(( (len=read(p[PIPE_PAREN_READ],buf,sizeof(buf)))
+			while(( (len=read(p[PIPE_PAREN_READ], buf, sizeof(buf)))
 				>0))
-				write(p[PIPE_CHILD_WRITE],buf,len);
+				write(p[PIPE_CHILD_WRITE], buf, len);
 		}
 		exit(0);
 	}
@@ -295,14 +295,14 @@ getfds(int *p, const struct global *d)
 }
 
 int
-pop_child_read(struct global *d, char *buf,size_t size)
+pop_child_read(struct global *d, char *buf, size_t size)
 {	int ret = 0;
 	int len;
 
 	len = read(d->fd[PIPE_CHILD_READ],buf, size);
 	if(!d->failed )
 	{	if( len > 0 )
-		{	if ( queue_enqueue(d->queue_local,buf,len) == -1 )
+		{	if ( queue_enqueue(d->queue_local, buf, len) == -1 )
 				ret = -1;
 		}
 		else
@@ -315,8 +315,8 @@ pop_child_read(struct global *d, char *buf,size_t size)
 		close(d->fd[PIPE_CHILD_READ]);
 		d->fd[PIPE_CHILD_READ] = -1;
 		if( len != 0 )
-	 		kill(d->pid,SIGKILL);
-	 	waitpid(d->pid,NULL,0);
+	 		kill(d->pid, SIGKILL);
+	 	waitpid(d->pid, NULL,0);
 	 	d->pid=0;
 	}
 		
