@@ -1,0 +1,15 @@
+
+popfilter is a transparent pop3 proxy that enable apply `on the fly' filters
+to the messages that are retrieved. Enable virus detections, mail backup,
+spam detection, mime sanitize.
+
+Very convenient with poor mail user agents that doesn't support pipe messages
+to programs and in enviroments where fetchmail and procmail are don't
+available.
+
+The project use POSIX functions. a win32 would be nice because the MUAs are so
+limited.. (eg: is difficult to SpamAssasin from Outlook). 
+
+
+See the man page for a full description
+

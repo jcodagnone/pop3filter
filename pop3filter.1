@@ -1,0 +1,202 @@
+.\" .TH = manual's title
+.\" .SH = section heading
+.\" .TP = Formats options correctly (sets up the "hanging indent")
+.\" .LP = used between paragraphs sections
+.\" .B  = bold
+.\" .I  = italic
+.\" .br = line break
+.\" \(bu bullet
+.\" \(dg cross
+.\" comment
+.\" See man groff_man
+
+.\" Macros
+.de EXAMPLE .\" Format de los ejemplos
+.RS 10
+.BR "\\$1"
+.RE
+..
+
+.TH POP3FILTER 0.0.0 "2002 June 18"
+.LO 1
+.SH NAME
+pop3filter \- POP3 Transparent Proxy with filters support
+
+.SH SYNOPSIS
+.HP 10
+.B pop3filter
+.RB [ \-hvf ]
+.RB [ \-\-help ] 
+.RB [ \-\-version ]
+.RB [ \-\-fork ]
+.IR lport
+.IR rhost
+.RB remoteport 
+[
+.IR filter
+]
+
+
+.SH ARGUMENTS
+.TP
+.IR lport
+local port to bind and listen
+.TP
+.IR rhost
+remote host to connect (the POP3 server)
+.TP
+.IR remoteport	
+remote port to connect (usually 110)
+.TP
+.IR filter
+program that will filter the messages. If none is selected the message is
+left as-is
+
+.SH OPTIONS
+
+.IP "-h or \-\-help"
+display the help and exit
+.IP "\-V or \-\-version"
+print version information and exit
+.IP "\-f or \-\-fork"
+fork to the background
+
+.SH FILTERS
+TODO
+.PP
+The following enviroment variables are defined in the enviroment of \
+the filter process:
+
+.TP
+.BR POP3_USERNAME
+The POP3 username. Eg. bob
+
+.TP
+.BR POP3_SERVER
+The POP3 server. Eg: pop3.isp.net
+
+.TP
+.BR POP3_RPORT
+The server's port. Eg: 110
+
+.TP
+.BR POP3_LPORT
+Local opened port. Eg: 11011
+
+.TP
+.BR POP3_VERSION
+Version of pop3filter. Eg: 0.0.1
+
+.SH EXAMPLES
+I assume that the POP3 server that we want to proxy is at 
+.B pop3.isp.net
+at the port
+.B 110.
+
+.IP \(bu 4 
+Say you want just to set up the proxy at the port 11011 with no \
+filter.
+.EXAMPLE "pop3filter 11011 pop3.isp.net 110"
+
+.IP \(bu
+Now you want to catch all request on your network going to 
+.B pop3.isp.net 
+so the thing goes transparent. If you use Linux(\*(Tm) 2.4, with Netfilter:
+.EXAMPLE "/usr/sbin/iptables \-t nat \-A PREROUTING \-i eth0 \-p tcp \-d \
+
+.IP  \(bu
+Now you want to leave the program running as a daemon?
+.EXAMPLE "pop3filter -f 11011 pop3.isp.net 110 "
+
+.IP \(bu
+Lets do some filtering. Filter can be another file or just an `in-line' \ 
+expression:
+.EXAMPLE "pop3filter 11011 pop3.isp.net 110 'grep -v ^Date: ' "
+(yes. nobody wants to do that, but is just an example)
+
+.IP \(bu
+Want to add some anti-spam header and rename dangerous attachments? You can 
+use a filter  something like:
+.EXAMPLE "$BASE/bin/spamc -p 11012 | $BASE/renattach -s -g"
+
+.B Note
+that the filter can be called several times at the same time (multiple
+connections from different clients, so if you are writing things to a file
+use some sort of lock. Backup the message in an 
+.I mbox
+and
+.I maildir 
+format is left as exercise. 
+I probably must add them here.
+
+.SH USEFULL TOOLS
+.TP
+.B RenAttach
+Renattach is a small, efficient and surprisingly effective filter designed
+primarily to offer an additional level of safety to Windows users whose
+e-mails pass through a UNIX-like mail server. Many modern viruses are spread
+through e-mail, and renattach combats such viruses by filtering e-mail
+attachments based on file extension. 
+.br
+http://www.pc-tools.net/linux/
+
+.TP
+.B SpamAssasin
+SpamAssassin is a mail filter to identify spam.
+Using its rule base, it uses a wide range of heuristic
+tests on mail headers and body text to identify "spam", also known as
+unsolicited commercial email.
+.br
+http://spamassassin.taint.org/
+
+.TP
+.B ripMIME
+Let you get all the parts of a MIME message (that means also get the files)
+With this one you can use an anti-virus.
+.br
+http://pldaniels.org/ripmime/
+
+.TP
+.B TNEF
+TNEF decodes those annoying MS-TNEF MIME attachments that Microsoft
+mail servers helpfully use to encapsulate your already MIME encoded
+attachments. 
+.br
+http://world.std.com/~damned/software.html
+
+.TP
+.B BASE64
+BASE64 (RFC 1341) Encoder/Decoder that i wrote some years ago. 
+Very simple. 
+.br
+http://www.ibiblio.org//pub/Linux/system/mail/base64-1.1.tar.gz
+
+.P
+Tell me if you want a pointer to your filter!
+
+.SH BUGS
+See the
+.I BUGS
+file in the distribution or go to 
+.UR "http://www.sf.net"
+Bug the Tracking Site
+.UE
+
+.SH AUTHOR
+Original written by Juan F. Codagnone <juam@users.sourceforge.net>
+
+.SH COPYRIGHT
+.PP
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+.PP
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the \s-1GNU\s0 Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``\s-1GNU\s0 General Public License'' and
+``\s-1GNU\s0 Free
+Documentation License'', with no Front-Cover Texts, and with no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled ``\s-1GNU\s0 Free Documentation License''.
+
