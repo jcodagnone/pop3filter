@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.17 2003/01/18 04:25:37 juam Exp $
+ * $Id: main.c,v 1.18 2003/01/19 19:56:51 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -33,6 +33,7 @@
 
 #include <unistd.h>
 
+#include "config.h"
 #include "main.h"
 #include "process.h"
 #include "trace.h"
@@ -295,7 +296,7 @@ hndl_sigterm( int signal )
 
 static int
 standalone_server( const struct opt *opt)
-{ 	unsigned int size;
+{ 	socklen_t size;
 	struct sockaddr_in cliAddr;
 	int server,local;
 

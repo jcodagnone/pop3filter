@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.8 2003/01/17 17:43:00 juam Exp $
+ * $Id: process.c,v 1.9 2003/01/19 19:56:51 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -78,9 +78,9 @@ int (*p)(struct global  *, const char *) )
 }
 
 
-static  void
+static int
 proxy_init( int local, int remote, const struct opt *opt,struct global *data,
-                 fd_set *r,fd_set *w,fd_set *e)
+                 fd_set *r,fd_set *w)
 {
 	data->local = local;
 	data->remote = remote;
@@ -94,14 +94,32 @@ proxy_init( int local, int remote, const struct opt *opt,struct global *data,
 	FD_SET(remote,r);
 
 	FD_ZERO(w);
-	FD_SET(local,w);
-	FD_SET(remote,w);
-	
-	FD_ZERO(e);
-	FD_SET(local,e);
-	FD_SET(remote,e);
 
-	return ; 
+	data->queue_fifo   = queue_new();
+	data->queue_remote = queue_new();
+	data->queue_local  = queue_new();
+	
+	if( ! queue_is_valid(data->queue_fifo  ) ||
+	    ! queue_is_valid(data->queue_remote) ||
+	    ! queue_is_valid(data->queue_local ) )
+	{	queue_delete(data->queue_fifo);
+		queue_delete(data->queue_remote);
+		queue_delete(data->queue_local );
+		
+		return -1;
+	}
+
+	data->fd[0] = data->fd[1] = data->fd[2] = data->fd[3] = -1;
+
+	return 0; 
+}
+
+static void
+proxy_delete( struct global *data )
+{
+	queue_delete(data->queue_fifo);
+	queue_delete(data->queue_remote);
+	queue_delete(data->queue_local );
 }
 
 /*
@@ -113,62 +131,123 @@ proxy_request ( int local, int remote, struct opt *opt )
 	char buf[MAX_BUFF];
 	string_t lstring,rstring;
 	int nRet=0;
-	fd_set rfds,rback,  wfds,wback, efds,eback;
-
+	fd_set rfds,rback,  wfds,wback;
+	char *s;
+	size_t len;
+	
 	if( !client_access( local, opt))
 		return -1;
 
-	proxy_init(local,remote,opt,&data,&rfds,&wfds,&efds);
+	if( proxy_init(local,remote,opt,&data,&rfds,&wfds) == -1 )
+		return -1;
+
 	lstring = NewString();
 	rstring = NewString();
 	if( lstring == NULL || rstring == NULL )
 	{	FreeString(lstring);
 		FreeString(rstring);
+		proxy_delete(&data);
+
 		return -1;
 	}
 
-	rback=rfds, eback=efds, wback=wfds;
-	while( nRet != -1 && select(FD_SETSIZE,&rback,NULL,&eback,NULL)>0 )
+	rback=rfds;
+	wback=wfds;
+	while( nRet != -1 && select(FD_SETSIZE,&rback,&wback,NULL,NULL)>0 )
 	{	
-		/* check the pipe first    */
-		if( data.pid &&
-		   FD_ISSET( data.fd[PIPE_CHILD_READ],&rback) )
-		{
+		/* read from the filter process */
+		if( data.fd[PIPE_CHILD_READ] != -1 && 
+		    FD_ISSET(data.fd[PIPE_CHILD_READ],&rback) )
 			nRet = pop_child_read(&data,buf,sizeof(buf));
+			
+		/* write to the filter process */
+		if( data.fd[PIPE_PAREN_WRITE] != -1 &&
+		    FD_ISSET( data.fd[PIPE_PAREN_WRITE],&wback) )
+		{	
+			s = queue_dequeue(data.queue_fifo,&len);
+			if( s )
+			{	write(data.fd[PIPE_PAREN_WRITE],s,len);
+				free(s);
+			}
 		}
 
-		if( FD_ISSET(local,&eback) || FD_ISSET(remote,&eback) )
-		{
-			break; /* uggg */
-		}
-
+		/* read commands from local socket */
 		if( FD_ISSET(local,&rback) )
-		{
 			nRet = readsock(local,buf,sizeof(buf),lstring,&data,
 			             pop_local_read);
-		}
 
+		/* read responces from pop3 server */
 		if( FD_ISSET(remote,&rback) )
-			 nRet = readsock(remote,buf,sizeof(buf),rstring,&data,
+			nRet = readsock(remote,buf,sizeof(buf),rstring,&data,
 			             pop_remote_read);
-		/*
-		 * if( FD_ISSET(local,&wback) )
-		 * 	 do_write_local(&data);
-		 *
-		 * if( FD_ISSET(remote,&wback) )
-		 *  	 do_write_remote(&data);
-		 */
 
-
-		rback=rfds, eback=efds, wback=wback;
-		/* restore flags */
-		if( data.pid  )
-		{	FD_SET(data.fd[PIPE_CHILD_READ],&rback);
+		/* write to sockets */
+		if( FD_ISSET(local,&wback) )
+		{	s = queue_dequeue(data.queue_local,&len);
+			send(local,s,len,0);
+			free(s);
 		}
 
-		
+		if( FD_ISSET(remote,&wback) )
+		{	s = queue_dequeue(data.queue_remote,&len);
+			send(remote,s,len,0);
+			free(s);
+		}
+
+		/* restore flags */
+		rback=rfds;
+		wback=wback;
+		if( data.fd[PIPE_CHILD_READ] != -1 )
+			FD_SET(data.fd[PIPE_CHILD_READ],&rback);
+
+		if( data.fd[PIPE_PAREN_WRITE] != -1 )
+		{	if( !queue_is_empty(data.queue_fifo ) )
+				FD_SET(data.fd[PIPE_PAREN_WRITE],&wback);
+			else
+				FD_CLR(data.fd[PIPE_PAREN_WRITE],&wback);
+		}
+		else
+			 FD_CLR(7,&wback);
+
+		if( !queue_is_empty(data.queue_local) )
+			FD_SET(data.local,&wback);
+		else
+			FD_CLR(data.local,&wback);
+			
+		if( !queue_is_empty(data.queue_remote) )
+			FD_SET(data.remote,&wback);
+		else
+			FD_CLR(data.remote,&wback);
+
+		if( data.last_cmd == CMD_RETR &&
+		    data.retr     == RT_END   &&
+		    data.fd[PIPE_PAREN_WRITE] != -1 &&
+		    queue_is_empty(data.queue_fifo))
+		{
+			FD_CLR(data.fd[PIPE_PAREN_WRITE],&wback);
+			close (data.fd[PIPE_PAREN_WRITE]);
+			data.fd[PIPE_PAREN_WRITE] = -1;
+		}
 	}
-	
+
+	/* if something failed, try to clean buffers */
+	nRet = 1;
+	while(nRet>0 && (s=queue_dequeue(data.queue_fifo,&len)))
+	{ 	nRet = write(data.fd[PIPE_PAREN_WRITE],s,len);
+		free(s);
+	}
+	nRet = 1;
+	while(nRet>0 && (s=queue_dequeue(data.queue_remote,&len)))
+	{ 	send(data.remote,s,len,0);
+		free(s);
+	}
+	nRet = 1;
+	while(nRet>0 && (s=queue_dequeue(data.queue_local,&len)))
+	{ 	send(data.local,s,len,0);
+		free(s);
+	}
+		
+	proxy_delete(&data);
 	FreeString(lstring);
 	FreeString(rstring);
 	

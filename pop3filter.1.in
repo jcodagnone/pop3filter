@@ -17,7 +17,7 @@
 .RE
 ..
 
-.TH POP3FILTER @VERSION@ @POP3FILTER_DATE@
+.TH POP3FILTER @VERSION@ "@POP3FILTER_DATE@"
 .LO 1
 .SH NAME
 pop3filter \- POP3 Transparent Proxy with filters support

@@ -1,6 +1,6 @@
 /*
  * queue.c - data queue
- * $Id: queue.c,v 1.1 2003/01/18 04:28:19 juam Exp $
+ * $Id: queue.c,v 1.2 2003/01/19 19:56:51 juam Exp $
  *
  * Copyright (C) 2003 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -101,7 +101,11 @@ void *
 queue_dequeue(queue_t q, size_t *len)
 {	struct queue *qu;
 	void *r;
+	size_t size = 0 ;
+	unsigned i = 0;
+	struct queue *ququ;
 
+	
 	if( q == NULL || len == NULL )
 		return NULL;
 
@@ -109,13 +113,43 @@ queue_dequeue(queue_t q, size_t *len)
 
 	if( qu == NULL )
 		return NULL;
-		
-	q->head =  qu->next;
-	
-	*len = qu->lenght;
-	r = qu->data;
-	free(qu);
 
+	/* how many blocks in a 4096 block?  */
+	for( ququ = qu, size = 0, i = 0 ; 
+	     ququ && size + ququ->lenght < 4096 ;
+	     i++,size+=ququ->lenght, ququ = ququ->next )
+		;
+
+	/* the first item is grater than 4096 */
+	if( i == 0 )
+	{	i = 1;
+		size = qu->lenght;
+	}
+
+	if( i == 1 )
+	{ 	q->head =  qu->next;
+	
+		*len = qu->lenght;
+		r = qu->data;
+		free(qu);
+	}
+	else
+	{	char *s;
+		
+		s = r = malloc(size);
+		*len = size;
+		
+		for( ; i>0 ; i-- )
+		{	q->head = qu->next;
+
+			memcpy(s,qu->data,qu->lenght);
+			s+=qu->lenght;
+			free(qu->data);
+			free(qu);
+			qu = qu->next;
+		}
+	}
+	
 	return r;
 }
 

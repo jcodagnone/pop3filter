@@ -1,11 +1,10 @@
-AM_CFLAGS = @CFLAGS@ -I ../lib -Ddebug=1
-AM_LDFLAGS = @LDFLAGS@ 
-LIBS = @LIBS@ -L ../lib -lmisc
+AM_CFLAGS = @CFLAGS@ -I../lib -Ddebug=1
+AM_LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@ -L../lib -lmisc
 
 bin_PROGRAMS = pop3filter
 
-pop3filter_SOURCES =	\
-			access.c	\
+pop3filter_SOURCES =	access.c	\
 			access.h	\
 			main.c  	\
 			main.h  	\

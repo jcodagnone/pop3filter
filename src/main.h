@@ -1,6 +1,6 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
-#include "config.h"
+#include <config.h>
 
 #ifndef VERSION 
  #define VERSION  "0.0.0"

@@ -1,6 +1,7 @@
 #ifndef _POP_H_
 #define _POP_H_
 
+#include "queue.h"
 
 enum cmds
 {
@@ -32,6 +33,11 @@ struct global
 	int fd[4];		/* comunication pipes */
 	enum cmds last_cmd;	/* the last pop3 command */
 	char username[80];
+
+	queue_t queue_fifo;  	/* data queue */
+	queue_t queue_remote;	/* send remote socket queue */
+	queue_t queue_local;	/* send local  socket queue */
+
 	/* RETR */
 	enum ST_RETR retr;	/* RETR state machine */
 	pid_t pid;		/* child process pid */
