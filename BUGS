@@ -1,0 +1,4 @@
+
+ * If you kill the proxy you have to wait some seconds to run it again
+   TODO: catch the signal and close the socket ?
+
