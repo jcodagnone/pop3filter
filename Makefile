@@ -1,3 +1,4 @@
+.PHONY : clean Changelog
 
 VERSION = 0.0.0
 
@@ -18,9 +19,6 @@ clean-lib:
 clean:	clean-src clean-lib
 	$(MAKE) -C src clean
 
-Changelog-src:
-	$(MAKE) -C src Changelog
-Changelog-lib:
-	$(MAKE) -C lib Changelog
-Changelog:	Changelog-lib Changelog-src
-	rcs2log > Changelog
+Changelog:
+	bin/cvs2cl.pl --distributed --ignore ChangeLog --revisions --tags \
+	-U ./cvs2cl.ufile

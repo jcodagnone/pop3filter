@@ -7,9 +7,6 @@ LIBOUT=libmisc.a
 
 all:	staticlib 
 
-Changelog: RCS/*
-	rcs2log > Changelog
-	
 staticlib: $(OBJS)
 	$(AR) cr $(LIBOUT) $(OBJS)
 
