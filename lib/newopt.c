@@ -1,7 +1,7 @@
 /*
  * newopt.c -- Command line options parser inspired in getopt(3)(in behavior)
  *
- * $Id: newopt.c,v 0.3 2002/06/18 17:07:32 juam Exp $
+ * $Id: newopt.c,v 0.4 2002/06/26 21:50:57 juam Exp $
  *
  * Copyright (C) 2001 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -463,9 +463,7 @@ process( optionT *table, const char *arg )
 			(*(callbackT)table->data)();
 			break;
 		case OPT_T_GENER:
-		{	const char **p=table->data;
-			*p=arg;
-		}
+			*((const char **)table->data) = arg;
 			break;
 		default:
 			assert( 0 );
