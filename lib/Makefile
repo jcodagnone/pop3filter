@@ -1,6 +1,6 @@
 .PHONY = all statclib clean co
 
-CFLAGS = -fPIC -I. -g -Wall -ansi -pedantic --pedantic-errors -I.
+CFLAGS = -fPIC -I. -I.. -g -Wall -pedantic --pedantic-errors -I.
 
 OBJS =  debug.o strdup.o newopt.o trace.o itoa.o
 LIBOUT=libmisc.a
