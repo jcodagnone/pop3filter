@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.16 2003/01/17 17:42:59 juam Exp $
+ * $Id: main.c,v 1.17 2003/01/18 04:25:37 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -39,7 +39,7 @@
 #include "newopt.h"
 
 #ifdef HAVE_SYSLOGD
- #include <syslogd>
+ #include <syslogd.h>
 #endif
 
 const char *rs_program_name; 	/* for the logs */
@@ -80,7 +80,7 @@ static void
 usage ( void )
 {
 	printf(
-"%s [-hvf] [-e file] [--help] [--version] [--fork] rhost rport lport [filter]\n",
+"%s [-hVf] [-e file] [--help] [--version] [--fork] rhost rport lport [filter]\n",
 	progname);
 
 	exit( EXIT_SUCCESS );
@@ -218,6 +218,8 @@ createServer(short port)
 	return sd;
 }
 
+/* procedure for each incomming connection
+ */
 static int
 child( int local, const struct opt *opt )
 {	int remote;
@@ -280,7 +282,7 @@ fork_to_background ( void )
 static void 
 hndl_sigterm( int signal )
 {	
-	/* Note: we don't our childs so transactions are finished
+	/* Note: we don't kill our childs so transactions are finished
 	 */
 
 	rs_log_info("signal %d, cleaning up and exiting",signal);
