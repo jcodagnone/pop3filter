@@ -3,22 +3,21 @@
 
 typedef struct stringCDT *  string_t;
 
-string_t
-NewString( void );
+string_t string_new( void );
+
+void string_destroy( string_t s );
 
 int
-StringCat( string_t s, char *q);
+string_cat( string_t s, const char *q);
 
 int
-StringNCat( string_t s, char *q, size_t n);
+string_ncat( string_t s, const char *q, size_t n);
 
-void
-FreeString( string_t s );
 
 const char *
-GetAnsiString( string_t s );
+string_get_as_ansi( string_t s );
 
 int
-StringClean( string_t s );
+string_reset( string_t s );
 
 #endif

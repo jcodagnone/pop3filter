@@ -1,6 +1,6 @@
 /*
  * process -- 
- * $Id: process.c,v 1.13 2004/05/01 15:07:35 juam Exp $
+ * $Id: process.c,v 1.14 2004/05/01 15:24:25 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -69,12 +69,12 @@ read_and_process( int socket, char *buff, size_t size,
 	else
 	{	buff[len] = '\0';
 		while( !ret && (s=strchr(buff, '\n')) )
-		{	StringNCat(string, buff, s - buff + 1);
+		{	string_ncat(string, buff, s - buff + 1);
 			buff = s + 1;
-			ret = (*process)(d, GetAnsiString(string) );
-			StringClean(string);
+			ret = (*process)(d, string_get_as_ansi(string) );
+			string_reset(string);
 		}
-		StringCat( string, buff );
+		string_cat( string, buff );
 	}
 
 	return ret;
@@ -141,11 +141,11 @@ proxy_run( int local, int remote, struct opt *opt )
 	if( proxy_init(&data, local, remote, opt, &rfds, &wfds) == -1 )
 		return -1;
 
-	local_str = NewString();
-	remote_str = NewString();
+	local_str = string_new();
+	remote_str = string_new();
 	if( local_str == NULL || remote_str == NULL )
-	{	FreeString(local_str);
-		FreeString(remote_str);
+	{	string_destroy(local_str);
+		string_destroy(remote_str);
 		proxy_delete(&data);
 
 		return -1;
@@ -252,8 +252,8 @@ proxy_run( int local, int remote, struct opt *opt )
 	}
 		
 	proxy_delete(&data);
-	FreeString(local_str);
-	FreeString(remote_str);
+	string_destroy(local_str);
+	string_destroy(remote_str);
 	
 	return 0;
 }

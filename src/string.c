@@ -1,6 +1,6 @@
 /*
  * string.c  -- String functions 
- * $Id: string.c,v 1.3 2003/01/17 17:43:00 juam Exp $
+ * $Id: string.c,v 1.4 2004/05/01 15:24:25 juam Exp $
  *
  * Copyright (C) 2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -23,8 +23,10 @@
 
 #include "mstring.h"
 
-#define INIT_CHUNK	512
-#define CHUNK_FACTOR	2
+enum {
+	INIT_CHUNK   = 512,
+	CHUNK_FACTOR = 2
+};
 
 struct stringCDT
 {
@@ -33,17 +35,16 @@ struct stringCDT
 	size_t size;	/* total allocated size */
 };
 
-/* resize_string
- * 	resize an string
- * Parameters
- *	s	string to resize
- *	min	minimun value to resize
- * Returns
- *	NULL	on error
- *	else	a pointer to the new address
+/**
+ * resize an string_t
+ * 
+ * @param 	s	string to resize
+ * @param	min	minimun value to resize
+ * 
+ * \returns NULL on error, else a pointer to the new address
  */
 static char *
-resize_string( string_t s, size_t min )
+_string_resize( string_t s, size_t min )
 {	size_t new = CHUNK_FACTOR * s->size;
 	char *q;
 	
@@ -62,7 +63,7 @@ resize_string( string_t s, size_t min )
 }
 
 string_t
-NewString( void )
+string_new( void )
 { 	string_t s;
 
 	s = malloc ( sizeof( *s) );
@@ -82,7 +83,7 @@ NewString( void )
 
 
 void
-FreeString( string_t s )
+string_destroy( string_t s )
 {
 	if( s != NULL )
 	{
@@ -90,18 +91,17 @@ FreeString( string_t s )
 		free( s );
 	}
 
-	return;
 }
 
 int
-StringNCat( string_t s, char *q, size_t len)
+string_ncat( string_t s, const char *q, size_t len)
 {	char *nRet=(char *)1;
 	
 	if( s == NULL || q == NULL )
 		return -1;
 
 	if( len + s->len + 1 >= s->size )
-		nRet = resize_string( s, len + s->len + 1 );
+		nRet = _string_resize( s, len + s->len + 1 );
 	
 	if( nRet )
 	{	s->len += len;
@@ -113,16 +113,16 @@ StringNCat( string_t s, char *q, size_t len)
 }
 
 int
-StringCat( string_t s, char *q)
+string_cat( string_t s, const char *q)
 {
 	if( s == NULL || q == NULL )
 		return -1;
 		
-	return StringNCat( s, q, strlen(q) );
+	return string_ncat( s, q, strlen(q) );
 }
 
 const char *
-GetAnsiString( string_t s )
+string_get_as_ansi( string_t s )
 {
 	if( s == NULL )
 		return NULL;
@@ -131,7 +131,7 @@ GetAnsiString( string_t s )
 }
 
 int
-StringClean( string_t s )
+string_reset( string_t s )
 {
 	if( s == NULL )
 		return -1;
@@ -147,14 +147,14 @@ int
 main(void)
 {	string_t s;
 
-	s =  NewString();
+	s =  string_new();
 
-	StringCat(s,"pepe");
-	StringCat(s," hola mundo");
-	/* StringClean(s); */
-	printf("|%s|\n",GetAnsiString(s));
+	string_cat(s,"pepe");
+	string_cat(s," hola mundo");
+	/* string_reset(s); */
+	printf("|%s|\n", string_get_as_ansi(s));
 	
-	FreeString(s);
+	string_destroy(s);
 
 	return 0;
 
