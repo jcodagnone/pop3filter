@@ -1,5 +1,5 @@
 /*
- * $Id: newopt.c,v 0.1 2001/10/01 03:47:42 juam Exp $
+ * $Id: newopt.c,v 0.2 2001/10/03 02:12:22 juam Exp $
  *
  * Command line options parser inspired in getopt(3) but unlike that,
  * this one _is_ THREAD SAFE
@@ -423,7 +423,7 @@ getint(const char *fmt,int *myint)
  */
 static int
 process( optionT *table, const char *arg )
-{	int nRet;
+{	int nRet=0;
 	typedef void (*callbackT)(void);
 
 	assert( table );
@@ -463,7 +463,7 @@ process( optionT *table, const char *arg )
 int
 GetOptions( char *const *argv, optionT *table, unsigned flags, void *reserved )
 {	struct global data;
-	int i;
+	int i=0;
 	int fail=0;
 
 	if( do_sanity(&data,argv,table,flags,reserved) <0 )
