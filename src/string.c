@@ -1,5 +1,5 @@
 /*
- * string.c  -- String functions 
+ * string.c  -- String object implemetation
  *
  * Copyright (C) 2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -93,7 +93,7 @@ string_destroy( string_t s )
 }
 
 int
-string_ncat( string_t s, const char *q, size_t len)
+string_n_append( string_t s, const char *q, size_t len)
 {	char *nRet=(char *)1;
 	
 	if( s == NULL || q == NULL )
@@ -112,12 +112,12 @@ string_ncat( string_t s, const char *q, size_t len)
 }
 
 int
-string_cat( string_t s, const char *q)
+string_append( string_t s, const char *q)
 {
 	if( s == NULL || q == NULL )
 		return -1;
 		
-	return string_ncat( s, q, strlen(q) );
+	return string_n_append( s, q, strlen(q) );
 }
 
 const char *
@@ -148,8 +148,8 @@ main(void)
 
 	s =  string_new();
 
-	string_cat(s,"pepe");
-	string_cat(s," hola mundo");
+	string_append(s,"pepe");
+	string_append(s," hola mundo");
 	/* string_reset(s); */
 	printf("|%s|\n", string_get_as_ansi(s));
 	

@@ -68,12 +68,12 @@ read_and_process( int socket, char *buff, size_t size,
 	else
 	{	buff[len] = '\0';
 		while( !ret && (s=strchr(buff, '\n')) )
-		{	string_ncat(string, buff, s - buff + 1);
+		{	string_n_append(string, buff, s - buff + 1);
 			buff = s + 1;
 			ret = (*process)(d, string_get_as_ansi(string) );
 			string_reset(string);
 		}
-		string_cat( string, buff );
+		string_append( string, buff );
 	}
 
 	return ret;
