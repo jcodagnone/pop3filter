@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.23 2004/04/29 04:29:05 juam Exp $
+ * $Id: main.c,v 1.24 2004/04/29 04:34:50 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -307,26 +307,28 @@ standalone_server( const struct opt *opt)
 { 	socklen_t size;
 	struct sockaddr_in cliAddr;
 	int server, local;
-
-	if( (server = createServer( opt->lport )) < 0 )
-		return EXIT_FAILURE;
-		
-	serverSocket = server;	
-	signal(SIGTERM, hndl_sigterm);
-	signal(SIGINT,  hndl_sigterm);
-
-	if( opt->fork )
-		fork_to_background();
-
-	size = sizeof(cliAddr);
-	while( (local=accept(server,(struct sockaddr *) &cliAddr,&size)) >=0 )
-		smart_fork(local, opt);	
+	int ret = EXIT_FAILURE;
 	
-	close(server);
+	if( (server = createServer( opt->lport )) < 0 )
+		ret = EXIT_FAILURE;
+	else {	
+		serverSocket = server;	
+		signal(SIGTERM, hndl_sigterm);
+		signal(SIGINT,  hndl_sigterm);
 
-	return EXIT_SUCCESS;
+		if( opt->fork )
+			fork_to_background();
+
+		size = sizeof(cliAddr);
+		while( (local = accept(server,(void *) &cliAddr,&size)) >=0 )
+			smart_fork(local, opt);	
+	
+		close(server);
+		ret = EXIT_SUCCESS;
+	}
+	
+	return ret;
 }
-
 
 static int
 inetd_server( const struct opt* opt)
