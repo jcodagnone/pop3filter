@@ -26,6 +26,7 @@ pop3filter \- POP3 Transparent Proxy with filters support
 .HP 10
 .B pop3filter
 .RB [ \-hvf ]
+.RB [ \-e\ file]
 .RB [ \-\-help ] 
 .RB [ \-\-version ]
 .RB [ \-\-fork ]
@@ -60,6 +61,9 @@ display the help and exit
 print version information and exit
 .IP "\-f or \-\-fork"
 fork to the background
+.IP "\-e file"
+Append filter stderr output to 
+.I file
 
 .SH FILTERS
 TODO
@@ -86,6 +90,11 @@ Local opened port. Eg: 11011
 .TP
 .BR POP3_VERSION
 Version of pop3filter. Eg: 0.0.1
+
+.SH NOTES
+When you kill the server (when running as a stand alone server) the child
+process (active clients) are not killed so the can finish their transaccions.
+I found this like a good behavior. Tell me your opinion if you do not agree.
 
 .SH EXAMPLES
 I assume that the POP3 server that we want to proxy is at 

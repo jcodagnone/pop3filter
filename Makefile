@@ -20,5 +20,5 @@ clean:	clean-src clean-lib
 	$(MAKE) -C src clean
 
 Changelog:
-	bin/cvs2cl.pl --distributed --ignore ChangeLog --revisions --tags \
+	bin/cvs2cl.pl --ignore ChangeLog --revisions --tags \
 	-U ./cvs2cl.ufile

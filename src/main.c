@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.13 2002/06/27 16:47:36 juam Exp $
+ * $Id: main.c,v 1.14 2002/07/18 21:59:05 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -242,7 +242,10 @@ smart_fork( int local, const struct opt *opt )
 		if( pid != 0 )
 			exit(0);
 		else
+		{	signal(SIGTERM,SIG_DFL);
+			signal(SIGINT,SIG_DFL);
 			child(local,opt);
+		}
 	}
 	wait(NULL);
 	close(local);
@@ -280,7 +283,9 @@ hndl_sigterm( int signal )
 	rs_log_info("signal %d, cleaning up and exiting",signal);
 	
 	/* proper close of the server socket */
-	close(serverSocket);	
+	close(serverSocket);
+
+	exit(EXIT_SUCCESS);
 }
 
 static int
