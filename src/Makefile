@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2002/06/19 03:03:27 juam Exp $ 
+# $Id: Makefile,v 1.6 2002/06/19 15:59:06 juam Exp $ 
 
 CFLAGS = -Wall  -g -pedantic -pedantic-errors -I../lib
 OBJS = main.o pop.o process.o string.o
@@ -15,8 +15,8 @@ Changelog:	RCS/*
 		rcs2log > Changelog
 
 # deps
-main.o:		process.h ../lib/trace.h ../lib/newopt.h
-process.o:	pop.h string.h
-pop.o:		pop.h
+main.o:		process.h ../lib/trace.h ../lib/newopt.h main.h
+process.o:	pop.h string.h main.h
+pop.o:		pop.h main.h
 string.o:	string.h
 trace.o:	trace.h
