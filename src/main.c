@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.3 2002/06/18 15:41:48 juam Exp $
+ * $Id: main.c,v 1.4 2002/06/18 16:43:51 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -19,8 +19,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <assert.h>
 
 #include <sys/types.h>
@@ -95,69 +96,6 @@ version( void )
 	exit( EXIT_SUCCESS );
 }
 
-/***************************************************************************/
-
-/* Creates a socket to `szServer:port'
- */
-static int
-connectHost(const char *szServer,short port)
-{ 	struct sockaddr_in server;
-	struct hostent *hp;
-	int sock;
-
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock < 0)
-	{	perror("-ERR socket\r\n");
-		return -1;
-	}
-
-	server.sin_family = AF_INET;
-	hp = gethostbyname(szServer);
-	if (hp == 0)
-	{	fprintf(stderr, "-ERR unknown host\r\n");
-		return -1;
-	}
-	memcpy((char *)&server.sin_addr, (char *)hp->h_addr, hp->h_length);
-
-	server.sin_port = htons((short) port );
-	if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0)
-	{	perror("-ERR connecting stream socket\r\n");
-		return -1;
-	}
-
-	return sock;
-}
-
-/* Creates a listening socket on port `port'
- */
-static int
-createServer(short port)
-{	struct sockaddr_in servAddr;
-	int sd;
-
-	/* create socket */
-	sd = socket(AF_INET, SOCK_STREAM, 0);
-	if( sd<0 )
-	{	perror("-ERR socket ");
- 		exit(1);
-	 }
- 
-	/* bind server port */
-	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servAddr.sin_port = htons(port);
- 
-	if(bind(sd, (struct sockaddr *) &servAddr, sizeof(servAddr))<0)
-	{	perror("-ERR bind");
-	  	exit(1);
-	}
-	
-	listen(sd,5);
-
-	return sd;
-}
-
-
 static int
 parseOptions( int argc, char * const * argv, struct opt *opt)
 {	int i;
@@ -175,11 +113,9 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 	memset(opt,0,sizeof(*opt) );
 	i = GetOptions( argv, lopt, 0, NULL);
 	if( i < 0 )
-	{	printf("%s: error while parsing options\n",progname);
+	{	rs_log_error("parsing options");
 		return -1;
 	}
-
-	
 	else if( argc - i < 3 )
 	{	usage();
 		return -1;
@@ -191,12 +127,79 @@ parseOptions( int argc, char * const * argv, struct opt *opt)
 	opt->exec = ( argc - i >= 4 ) ? argv[i+3] : NULL;
 
 	if( opt->lport==0 || opt->rport == 0)
-	{	printf("%s: error port numbers are not integers\n",progname);
+	{	rs_log_error("error port numbers are not integers");
 		usage();
 		return -1;
 	}
 	return 0;
 }
+/***************************************************************************/
+
+/* Creates a socket to `szServer:port'
+ */
+static int
+connectHost(const char *szServer,short port)
+{ 	struct sockaddr_in server;
+	struct hostent *hp;
+	int sock;
+
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock < 0)
+	{	rs_log_error("creating socket: %s",strerror(errno));
+		return -1;
+	}
+
+	server.sin_family = AF_INET;
+	hp = gethostbyname(szServer);
+	if (hp == 0)
+	{	rs_log_error("can't resolv `%s'",szServer);
+		return -1;
+	}
+	memcpy((char *)&server.sin_addr, (char *)hp->h_addr, hp->h_length);
+
+	server.sin_port = htons((short) port );
+	if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0)
+	{	rs_log_error("connectig to `%s': %s",szServer,strerror(errno));
+		return -1;
+	}
+
+	return sock;
+}
+
+/* Creates a listening socket on port `port'
+ */
+static int
+createServer(short port)
+{	struct sockaddr_in servAddr;
+	int sd;
+
+	/* create socket */
+	sd = socket(AF_INET, SOCK_STREAM, 0);
+	if( sd<0 )
+	{	rs_log_error("creating socket: %s",strerror(errno));
+ 		return -1;
+	}
+ 
+	/* bind server port */
+	servAddr.sin_family = AF_INET;
+	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servAddr.sin_port = htons(port);
+ 
+	if(bind(sd, (struct sockaddr *) &servAddr, sizeof(servAddr))<0)
+	{	rs_log_error("binding socket: %s",strerror(errno));
+	  	return -1;
+	}
+	
+	if( listen(sd,5) == -1 )
+	{	rs_log_error("listening socket: %s",strerror(errno));
+		return -1;
+	}
+	
+	return sd;
+}
+
+
+
 
 static int
 child( int local, struct opt *opt )
@@ -238,19 +241,20 @@ main( int argc, char **argv )
 	unsigned int size;
 
 	progname = rs_program_name = *argv;
+	rs_trace_to(rs_trace_stderr); 
 
 	if( parseOptions( argc, argv, &opt ) < 0 )
-		return 1;
+		return EXIT_FAILURE;
 
-	server = createServer( opt.lport );
-
+	if( (server = createServer( opt.lport )) < 0 )
+		return EXIT_FAILURE;
+	
 	size = sizeof(cliAddr);
 	while( (local=accept(server,(struct sockaddr *) &cliAddr,&size)) >=0 )
 		smart_fork(local,&opt);	
 	
-
 	close(server);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 

@@ -1,6 +1,6 @@
 /*
  * pop -- 
- * $Id: pop.c,v 1.2 2002/06/18 15:58:55 juam Exp $
+ * $Id: pop.c,v 1.3 2002/06/18 16:43:51 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -37,12 +37,11 @@
 #include <signal.h>
 #include <unistd.h>
 
+#include <trace.h>
 #include "pop.h"
 
 #define MAX_POPCMD	76
 #define MAX_POP3_RESPONSE       80
-
-#define debug printf
 
 struct cmd_table
 {	char *name;
@@ -292,4 +291,4 @@ pop_child_read(struct global *d, char *buf,size_t size)
 		
 	return ret<=0 ? ret:len;
 }
-/*******************************************************************************/
+/******************************************************************************/
