@@ -1,6 +1,6 @@
 /*
  * main -- filtered transparent pop3 proxy implementation
- * $Id: main.c,v 1.7 2002/06/19 17:52:53 juam Exp $
+ * $Id: main.c,v 1.8 2002/06/20 02:38:06 juam Exp $
  *
  * Copyright (C) 2001,2002 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -218,6 +218,7 @@ smart_fork( int local, struct opt *opt )
 		else
 			child(local,opt);
 	}
+	wait(NULL);
 	close(local);
 }
 
