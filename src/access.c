@@ -28,9 +28,12 @@
 #include "main.h"
 #include <trace.h>
 
+
 int
 client_access( int sock, const  struct opt *opt)
 {
+
+	/** \todo  implement client access policy */
 
 	return 1;
 }
