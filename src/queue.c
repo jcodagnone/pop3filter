@@ -1,6 +1,6 @@
 /*
  * queue.c - data queue
- * $Id: queue.c,v 1.2 2003/01/19 19:56:51 juam Exp $
+ * $Id: queue.c,v 1.3 2003/06/04 16:33:15 juam Exp $
  *
  * Copyright (C) 2003 by Juan F. Codagnone <juam@users.sourceforge.net>
  *
@@ -21,17 +21,23 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+
+#include <trace.h>
 #include "queue.h"
 
-struct queue
-{	size_t lenght;
+
+#define IS_QUEUE(t) (t!=NULL)
+
+struct node
+{	size_t length;
 	void *data;
-	struct queue *next;
+	struct node *next;
 };
 
 struct queueHead
-{	struct queue *head;
-	struct queue *tail;
+{	struct node *head;
+	struct node *tail;
 };
 
 queue_t
@@ -39,128 +45,146 @@ queue_new(void)
 {	queue_t q;
 
 	q = malloc(sizeof(*q));
-	if( q == NULL )
-		return NULL;
-	q->head = NULL;
-	q->tail = NULL;
-
+	if( q )
+	{	q->head = NULL;
+		q->tail = NULL;
+	}
+	
 	return q;
 }
 
-int queue_is_valid(queue_t q)
+int
+queue_is_valid(queue_t q)
 {
 	return q!=NULL;
 }
+
 void
 queue_delete(queue_t q)
-{	struct queue *qu;
+{	struct node *node, *next;
 
-	if( q == NULL )
-		return;
-
-	for(qu = q->head ; qu ; qu = qu->next )
+	if( IS_QUEUE(q) )
 	{
-		free(qu->data);
-		free(qu);
+		for( node = q->head ; node ; node = next )
+		{	next = node->next;
+			free(node->data);
+			free(node);
+		}
+		free(q);
 	}
-	free(q);
 }
 
 int
 queue_enqueue(queue_t q, const void *data, size_t len)
-{	struct queue *qu;
-
-	if( q == NULL || data == NULL || len == 0)
-		return -1;
-
-	qu = malloc(sizeof(*qu));
-	if( qu == NULL )
-		return -1;
-
-	/* fill cell */
-	qu->lenght = len;
-	qu->next   = NULL;
-	qu->data   = malloc(len);
-	if( qu->data == NULL )
-	{	free(qu);
-		return -1;
-	}
-	memcpy(qu->data,data,len);
-
-	if( q->head == NULL )
-		q->head = qu;
-	else
-		q->tail->next = qu;
-	q->tail = qu;
-
-	return 0;
-}
-
-
-void *
-queue_dequeue(queue_t q, size_t *len)
-{	struct queue *qu;
-	void *r;
-	size_t size = 0 ;
-	unsigned i = 0;
-	struct queue *ququ;
-
+{	struct node *node;
+	int ret = 0;
 	
-	if( q == NULL || len == NULL )
-		return NULL;
+	if( IS_QUEUE(q) && data && len )
+	{ 	node = malloc(sizeof(*node));
+		if( node == NULL )
+			ret = -1;
+		else
+		{	node->length = len;
+			node->data   = malloc(len);
+			node->next   = NULL;
+			
+			if( node->data )
+			{ 	memcpy(node->data, data, len); 
+				if( q->head == NULL )
+					q->head = node;
+				else
+					q->tail->next = node;
+				q->tail = node;
+			}
+			else
+			{	free(node);
+				ret = -1;
+			}
 
-	qu = q->head;
-
-	if( qu == NULL )
-		return NULL;
-
-	/* how many blocks in a 4096 block?  */
-	for( ququ = qu, size = 0, i = 0 ; 
-	     ququ && size + ququ->lenght < 4096 ;
-	     i++,size+=ququ->lenght, ququ = ququ->next )
-		;
-
-	/* the first item is grater than 4096 */
-	if( i == 0 )
-	{	i = 1;
-		size = qu->lenght;
-	}
-
-	if( i == 1 )
-	{ 	q->head =  qu->next;
-	
-		*len = qu->lenght;
-		r = qu->data;
-		free(qu);
-	}
-	else
-	{	char *s;
-		
-		s = r = malloc(size);
-		*len = size;
-		
-		for( ; i>0 ; i-- )
-		{	q->head = qu->next;
-
-			memcpy(s,qu->data,qu->lenght);
-			s+=qu->lenght;
-			free(qu->data);
-			free(qu);
-			qu = qu->next;
 		}
 	}
-	
-	return r;
+	else
+		ret = -1;
+		
+	return ret;
+}
+
+#define DEQUEUE_BLOCK 4096
+
+static int
+get_needed_nodes_to_fill_block( queue_t q, unsigned max, unsigned *real)
+{	struct node *node;
+	unsigned i;
+	unsigned count = 0;
+
+	assert(q);
+	node = q->head;
+	assert(q->head);
+
+	for( i=0 ; node &&  count + node->length < max ; i++)
+	{	count += node->length;
+		node = node->next; 
+	}
+
+	/* return at least one item (yeah. greater than top) */
+	if( i == 0 )
+	{	count = node->length; 
+		i = 1;
+	}
+
+	if( real )
+		*real = count;
+		
+	return i;
+}
+
+void *
+queue_block_dequeue(queue_t q, size_t *len, size_t block)
+{	struct node *node;
+	void *ret;
+	unsigned i = 0;
+
+	if( IS_QUEUE(q) && len && q->head )
+	{	i = get_needed_nodes_to_fill_block(q, 4096, len);
+
+		assert(i);
+		if( i == 1 )
+		{ 	node = q->head;
+			q->head =  node->next;
+			if( q->head == NULL )
+				q->tail = NULL;
+			ret = node->data;
+			free(node);
+		}
+		else
+		{	char *s;
+			
+			s = ret = malloc(*len);
+			
+			for( ; i>0 ; i-- )
+			{	node = q->head;
+
+				if( node )
+				{ 	q->head = node->next; 
+					memcpy(s, node->data, node->length);
+					s += node->length;
+
+					free(node->data);
+					free(node);
+				}
+				else
+					rs_log_warning("dequeue: node is null");
+			}
+		}
+	}
+	else
+		ret = NULL;
+		
+	return ret;
 }
 
 int
 queue_is_empty( queue_t q )
-{	int r;
-
-	if( q == NULL )
-		r = 1;
-	else
-		r = q->head == NULL;
-
-	return r;
+{ 
+	return IS_QUEUE(q) ? q->head == NULL : 1;
 }

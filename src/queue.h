@@ -10,6 +10,6 @@ int queue_is_valid(queue_t q);
 int queue_is_empty(queue_t q);
 
 int    queue_enqueue(queue_t q, const void *data, size_t len);
-void * queue_dequeue(queue_t q, size_t *len);
+void * queue_block_dequeue(queue_t q, size_t *len, size_t block);
 
 #endif
