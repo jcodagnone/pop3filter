@@ -1,4 +1,4 @@
-AM_CFLAGS = @CFLAGS@ -I../lib -Ddebug=1
+AM_CFLAGS = @CFLAGS@ -I$(srcdir)/../lib -Ddebug=1
 AM_LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@ -L../lib -lmisc
 

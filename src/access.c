@@ -7,7 +7,7 @@
 #include <netdb.h>
 
 #include "main.h"
-#include "trace.h"
+#include <trace.h>
 
 int
 client_access( int sock, const  struct opt *opt)
