@@ -19,3 +19,8 @@ clean:
 co:
 	$(CO) RCS/*
 
+debug.o:	debug.h
+strdup.o:	strdup.h
+newopt.o:	newopt.h
+trace.o:	trace.h ../config.h
+itoa.o:		itoa.h ../config.h
